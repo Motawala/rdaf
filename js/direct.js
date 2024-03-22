@@ -68,7 +68,6 @@ function buildTheGraph(){
                 const h = topicElement.size().height
                 topicElement.size(w + 200, h)
                 Elements.push(topicElement)
-                //createTextBlock(topicElement, node, stage)
                 if(topics["sunyrdaf:includes"]){
                   //Creates the consideration button if a topic includes consideration
                   var port3 = createPort('Considerations', 'out');
@@ -77,10 +76,6 @@ function buildTheGraph(){
                   const considerationButton = createConsiderationButton(port3)
                   considerationButton.options.x = "85%"
                   tools.push(considerationButton)//Create the button
-                  graph.addCells(topicElement);
-                  let toolsView = new joint.dia.ToolsView({ tools: [tools]});
-                  topicElement.findView(paper).addTools(toolsView);//Embed the tools view into the element view
-                  createTextBlock(topicElement,topics["sunyrdaf:includes"], stage )
                 }
                 var port2 = createPort('Outcomes', 'out');
                 // Add custom tool buttons for each port
