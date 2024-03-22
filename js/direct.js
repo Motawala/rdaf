@@ -1,84 +1,22 @@
 const { dia, elementTools, shapes, linkTools, util } = joint;
-// Create a new directed graph
-const graph = new dia.Graph({}, { cellNamespace: shapes });
 
-var CustomLinkView = joint.dia.LinkView.extend({
-  // custom interactions:
-  pointerdblclick: function(evt, x, y) {
-      this.addVertex(x, y);
-  },
-  contextmenu: function(evt, x, y) {
-      this.addLabel(x, y);
-  },
+// Global Vars
+var graph;
+var paper;
+var root = [];
+var models = [];
+var duplicateFrame = [];
+var createdElementIds = new Set();
 
-  // custom options:
-  options: joint.util.defaults({
-      doubleLinkTools: true,
-  }, joint.dia.LinkView.prototype.options)
-});
+// initialize 
+init(); 
 
-
-// Create a new paper, which is a wrapper around SVG element
-const paper = new dia.Paper({
-  interactive: { vertexAdd: false }, // disable default vertexAdd interaction
-  el: document.getElementById('graph-container'),
-  model: graph,
-  linkView: CustomLinkView,
-  interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
-  width: 10000, //window.innerWidth,
-  height: 50000,//window.innerHeight,
-  overflow: true,
-  gridSize: 10,
-  perpendicularLinks: true,
-  drawGrid: true,
-  background: {
-    color: '#f9f9f9'
-  },
-  defaultLinkAnchor: {
-    name: 'connectionLength'
-  },
-  interactive: {
-      linkMove: false,
-      labelMove: false
-  },
-  async: true,
-  //Viewport function supports collapsing/uncollapsing behaviour on paper
-  viewport: function(view) {
-    // Return true if model is not hidden
-    return !view.model.get('hidden');
-  }
-});
-
-// Fit the paper content to the container size
-paper.transformToFitContent()
-
-
-let duplicateFrame = []
-
-/*
-  There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
-*/
-paper.on('element:pointerclick', function(view, evt) {
-    evt.stopPropagation();
-    if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
-      toggleBranch(view.model);
-    }
-    // resetting the layout here has an effect after collapsing and then moving the topic nodes
-    // manually to be closer (it moves them so the expanded nodes will fit if you re-expand after
-    // moving. It doesn't seem to have any effect after just collapsing a node's children
-    // though. So I think it has promise as an approach but more work is needed to figure out
-    // how to get the layout to redraw everytime the way we want it to
-})
-
-
-var root = []
-var models = []
 function buildTheGraph(){
-  var Elements = []
-    fetch('./data/json-ld/graph.jsonld')
-  .then(response => response.json())
-   // specifying a frame allows you to set the shape of the graph you want to navigate
-  .then(data => jsonld.frame(data,
+  var Elements = [];
+  fetch('./data/json-ld/graph.jsonld')
+    .then(response => response.json())
+     // specifying a frame allows you to set the shape of the graph you want to navigate
+    .then(data => jsonld.frame(data,
     {
         "@context": {
             "name": "https://schema.org/name",
@@ -107,72 +45,66 @@ function buildTheGraph(){
               "@type": "@id"
             },
         },
-  }))
-  .then(frame => {
-
-// example of pulling a single Outcome and linked Activity from the input data file
-// in reality we want to navigate the entire graph
-  const frameArray = frame['@graph']
-  duplicateFrame = frameArray
-  frameArray.forEach(node =>{
-    if(node['additionalType'] == "RdAF Stage"){
-      var stage = linkNodes(node, Elements, "", "Stages")
-      stage.position(100,100)
-      graph.addCells(stage)
-      root.push(stage)
-      //Elements.push(stage)
-      topic = node['sunyrdaf:includes']
-      if(Array.isArray(topic)){
-        topic.forEach(topics =>{
-        var tools = [];
-        if(topics){
-          //Creates the topic
-          var topicElement = linkNodes(topics, Elements, stage, "Topics")
-          const w = topicElement.size().width
-          const h = topicElement.size().height
-          topicElement.size(w + 200, h)
-          Elements.push(topicElement)
-          //createTextBlock(topicElement, node, stage)
-          if(topics["sunyrdaf:includes"]){
-            //Creates the consideration button if a topic includes consideration
-            var port3 = createPort('Considerations', 'out');
-            // Add custom tool buttons for each port
-            topicElement.addPort(port3);// Adds a port to the element
-            const considerationButton = createConsiderationButton(port3)
-            considerationButton.options.x = "85%"
-            tools.push(considerationButton)//Create the button
-            graph.addCells(topicElement);
-            toolsView = new joint.dia.ToolsView({ tools: [tools]});
-            topicElement.findView(paper).addTools(toolsView);//Embed the tools view into the element view
-            createTextBlock(topicElement,topics["sunyrdaf:includes"], stage )
+    })).then(frame => {
+      // example of pulling a single Outcome and linked Activity from the input data file
+      // in reality we want to navigate the entire graph
+      const frameArray = frame['@graph']
+      duplicateFrame = frameArray
+      frameArray.forEach(node =>{
+        if(node['additionalType'] == "RdAF Stage"){
+          var stage = linkNodes(node, Elements, "", "Stages")
+          stage.position(100,100)
+          graph.addCells(stage)
+          root.push(stage)
+          //Elements.push(stage)
+          topic = node['sunyrdaf:includes']
+          if(Array.isArray(topic)){
+            topic.forEach(topics =>{
+              var tools = [];
+              if(topics){
+                //Creates the topic
+                var topicElement = linkNodes(topics, Elements, stage, "Topics")
+                const w = topicElement.size().width
+                const h = topicElement.size().height
+                topicElement.size(w + 200, h)
+                Elements.push(topicElement)
+                //createTextBlock(topicElement, node, stage)
+                if(topics["sunyrdaf:includes"]){
+                  //Creates the consideration button if a topic includes consideration
+                  var port3 = createPort('Considerations', 'out');
+                  // Add custom tool buttons for each port
+                  topicElement.addPort(port3);// Adds a port to the element
+                  const considerationButton = createConsiderationButton(port3)
+                  considerationButton.options.x = "85%"
+                  tools.push(considerationButton)//Create the button
+                  graph.addCells(topicElement);
+                  let toolsView = new joint.dia.ToolsView({ tools: [tools]});
+                  topicElement.findView(paper).addTools(toolsView);//Embed the tools view into the element view
+                  createTextBlock(topicElement,topics["sunyrdaf:includes"], stage )
+                }
+                var port2 = createPort('Outcomes', 'out');
+                // Add custom tool buttons for each port
+                topicElement.addPort(port2);
+                const outcomeButton = createButton(port2)
+                outcomeButton.options.x = "85%"
+                tools.push(outcomeButton)//Creates the Outcome button
+                graph.addCells(topicElement);
+                let toolsView = new joint.dia.ToolsView({ tools: tools}); 
+                topicElement.findView(paper).addTools(toolsView);
+                checkOutcomes(topics, Elements, topicElement)
+                createTextBlock(topicElement,topics, stage )
+              }
+            })
           }
-          var port2 = createPort('Outcomes', 'out');
-          // Add custom tool buttons for each port
-          topicElement.addPort(port2);
-          const outcomeButton = createButton(port2)
-          outcomeButton.options.x = "85%"
-          tools.push(outcomeButton)//Creates the Outcome button
-          graph.addCells(topicElement);
-          toolsView = new joint.dia.ToolsView({ tools: tools});
-          topicElement.findView(paper).addTools(toolsView);
-          checkOutcomes(topics, Elements, topicElement)
-          createTextBlock(topicElement,topics, stage )
         }
-      })
-    }
-  }
-  });
-  paper.setInteractivity(false);
-  graph.addCells(Elements)
-  // Perform layout after setting positions
-  models = Elements
-  ayout = doLayout();
+    });
+    paper.setInteractivity(false);
+    graph.addCells(Elements)
+    // Perform layout after setting positions
+    models = Elements
+    doLayout();
   })
 }
-
-
-
-
 
 //If we want to use a pre-defined algorithm to traverse over the tree and create the tree, we will still need seperate functions for each and every type of node,
 //Beacuse this will allows use to interact with the node later using its type when we put the buttons in function.
@@ -201,8 +133,6 @@ function checkOutcomes(topic, arr, parentNode){
   }
 
 }
-
-
 
 function createTextBlock(element, node, parentNode){
   var parentElementView = paper.findViewByModel(parentNode)
@@ -371,7 +301,6 @@ function checkForSubTopics(outcome, arr, parentNode){
   }
 }
 
-const createdElementIds = new Set();
 /*
 This function takes the nodes and links it
 */
@@ -436,8 +365,6 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
   }
 }
 
-
-
 function doLayout() {
   // Apply layout using DirectedGraph plugin
   var visibleElements = []
@@ -465,10 +392,69 @@ function doLayout() {
   setLinkVertices();    //Sets the vertices that is, marks the points where the links should route from
 }
 
-buildTheGraph();
+function init() {
+  // initialize the graph
+  graph = new dia.Graph({}, { cellNamespace: shapes });
 
-//doLayout();
+  let CustomLinkView = joint.dia.LinkView.extend({
+    // custom interactions:
+    pointerdblclick: function(evt, x, y) {
+      this.addVertex(x, y);
+    },
+    contextmenu: function(evt, x, y) {
+      this.addLabel(x, y);
+    },
+    // custom options:
+    options: joint.util.defaults({
+      doubleLinkTools: true,
+    }, 
+    joint.dia.LinkView.prototype.options)
+  });
 
 
+  // Create a new paper, which is a wrapper around SVG element
+  paper = new dia.Paper({
+    interactive: { vertexAdd: false }, // disable default vertexAdd interaction
+    el: document.getElementById('graph-container'),
+    model: graph,
+    linkView: CustomLinkView,
+    interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
+    width: 10000, //window.innerWidth,
+    height: 50000,//window.innerHeight,
+    overflow: true,
+    gridSize: 10,
+    perpendicularLinks: true,
+    drawGrid: true,
+    background: {
+      color: '#f9f9f9'
+    },
+    defaultLinkAnchor: {
+      name: 'connectionLength'
+    },
+    interactive: {
+      linkMove: false,
+      labelMove: false
+    },
+    async: true,
+    //Viewport function supports collapsing/uncollapsing behaviour on paper
+    viewport: function(view) {
+      // Return true if model is not hidden
+      return !view.model.get('hidden');
+    }
+  });
 
+  // Fit the paper content to the container size
+  paper.transformToFitContent()
+
+  /*
+    There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
+  */
+  paper.on('element:pointerclick', function(view, evt) {
+    evt.stopPropagation();
+    if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
+      toggleBranch(view.model);
+    }
+  })
+  buildTheGraph();
+}
 
