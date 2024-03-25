@@ -6,7 +6,7 @@ var paper;
 var root = [];
 var models = [];
 var duplicateFrame = [];
-var createdElementIds = new Set();
+var createdConsiderationElementIds = new Set();
 
 // initialize 
 init(); 
@@ -341,12 +341,12 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
   if(typeOfNode == "Considerations"){
     const considerationElement = createConsiderations(childNode['@id'], childNode['name'])
     const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-    if (createdElementIds.has(childNode['@id'])) {
+    if (createdConsiderationElementIds.has(childNode['@id'])) {
       console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
     }else{
       var portName = ['Definition']
       const embedButton = buttonView("Definition", considerationElement, portName)
-      createdElementIds.add(childNode['@id'])
+      createdConsiderationElementIds.add(childNode['@id'])
     }
     considerationElement.prop('name/first', "Considerations")
     arr.push(considerationElement, linkOutcomeToConsideration)
