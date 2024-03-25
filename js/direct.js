@@ -6,7 +6,7 @@ var paper;
 var root = [];
 var models = [];
 var duplicateFrame = [];
-var createdConsiderationElementIds = new Set();
+var multiParentElementIds = {};
 
 // initialize 
 init(); 
@@ -339,18 +339,21 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     return activityElement;
   }
   if(typeOfNode == "Considerations"){
-    const considerationElement = createConsiderations(childNode['@id'], childNode['name'])
-    const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-    if (createdConsiderationElementIds.has(childNode['@id'])) {
+    var considerationElement
+    if (multiParentElementIds[childNode['@id']]) {
       console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      considerationElement = multiParentElementIds[childNode['@id']];
+      const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
+      arr.push(linkOutcomeToConsideration)
     }else{
+      considerationElement = createConsiderations(childNode['@id'], childNode['name'])
       var portName = ['Definition']
       const embedButton = buttonView("Definition", considerationElement, portName)
-      createdConsiderationElementIds.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = considerationElement;
+      considerationElement.prop('name/first', "Considerations")
+      const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
+      arr.push(considerationElement, linkOutcomeToConsideration)
     }
-    considerationElement.prop('name/first', "Considerations")
-    arr.push(considerationElement, linkOutcomeToConsideration)
-
     return considerationElement;
   }
   if(typeOfNode == "Subtopic"){
