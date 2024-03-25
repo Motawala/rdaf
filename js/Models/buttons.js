@@ -71,10 +71,10 @@ var rect = new joint.shapes.standard.Rectangle({
 //This function takes in a list of ports that are to be embeded into the element,
 //Make sure the port Ids of the ports are always different
 //Creates a set of 3 circle buttons that are required in the Activities
-function radioButtonView(portName, element, tools){
-  var port1 = createPort(portName[0], 'out');
-  var port2 = createPort(portName[1],'out');
-  var port3 = createPort(portName[2], 'out');
+function radioButtonView(portNameList, element, tools){
+  var port1 = createPort(portNameList[0], 'out');
+  var port2 = createPort(portNameList[1],'out');
+  var port3 = createPort(portNameList[2], 'out');
   element.addPort(port1)
   element.addPort(port2)
   element.addPort(port3)
@@ -86,7 +86,7 @@ var i = 0
 /*
   BUTTONS VIEW: Adds the button to the tools View
 */
-function buttonView(portName, element, portNameList, parentNode){
+function buttonView(portName, element){
   var port = createPort(portName, 'out', 'Port 3');
   var considerationPort = createPort("Considerations", "out", "Port 4")
   var subTopicPort = createPort("RDaF Subtopic", 'out', 'Port 5')
@@ -103,6 +103,7 @@ function buttonView(portName, element, portNameList, parentNode){
     tool.push(createConsiderationButton(considerationPort))
     tool.push(createButton(port))
     //Push the circle buttons to the same list
+    var portNameList = ['NT1', "PG1", "AC1"]
     tool.push(radioButtonView(portNameList, element, tool))
     tool.push(createSubTopicButton(subTopicPort))
   }
@@ -118,8 +119,6 @@ function buttonView(portName, element, portNameList, parentNode){
 }
 
 function createElementView(element, tool){
-  //Add the element to the graph
-  graph.addCells(element);
   toolsView = new joint.dia.ToolsView({ tools: tool});
   //Create an element view
   var elementView = element.findView(paper)

@@ -54,7 +54,6 @@ function buildTheGraph(){
         if(node['additionalType'] == "RdAF Stage"){
           var stage = linkNodes(node, Elements, "", "Stages")
           stage.position(100,100)
-          graph.addCells(stage)
           root.push(stage)
           topic = node['sunyrdaf:includes']
           if(Array.isArray(topic)){
@@ -82,7 +81,6 @@ function buildTheGraph(){
                 const outcomeButton = createButton(port2)
                 outcomeButton.options.x = "85%"
                 tools.push(outcomeButton)//Creates the Outcome button
-                graph.addCells(topicElement);
                 let toolsView = new joint.dia.ToolsView({ tools: tools}); 
                 topicElement.findView(paper).addTools(toolsView);
                 checkOutcomes(topicObj, Elements, topicElement)
@@ -93,9 +91,11 @@ function buildTheGraph(){
         }
     });
     paper.setInteractivity(false);
-    graph.addCells(Elements)
+    // the models list will be in the order the elements were added to the graph
+    // it seems like there ought to be a way to get this from the JointJS library
+    // itself - possibly the graph.dfs method??
+    models = Elements;
     // Perform layout after setting positions
-    models = Elements
     doLayout();
   })
 }
@@ -222,9 +222,14 @@ function checkForConsiderations(outcome, arr, parentNode){
 }
 
 //Function to Create activity nodes that are the results of the ouctomes generated
+/** 
+ * Create and link Activity elements
+ * @param {Object} outcome - the outcome object in the JSON-LD graph
+ * @param {Object[]} arr - the list of JointJS graph elements created so far
+ * @param {Object} parentNode - the parent Outcome element in the JointJS graph
+ */
 function checkForActivities(outcome, arr, parentNode){
-  var portName = ['NT1', "PG1", "AC1"]
-  const embedButton = buttonView("Activities", parentNode, portName)
+  const embedButton = buttonView("Activities", parentNode)
   for (const key in outcome){
     if(key.startsWith('sunyrdaf')){
       if(key == "sunyrdaf:resultsFrom"){
@@ -303,7 +308,7 @@ function checkForSubTopics(outcome, arr, parentNode){
 }
 
 /*
- * Create a node for the JointJS graph and link it to its parent
+ * Create and add a node for the JointJS graph along with the link to its parent
  * @param {Object} childNode - an object in the JSON-LD graph
  * @param {Object[]} arr - the list of elements in the JointJS graph
  * @param {Object} parentNode - the parent object in the JSON-LD graph
@@ -315,27 +320,31 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     var stage = createStage(childNode['@id'], childNode['name'])
     stage.prop('name/first', "Stages")
     arr.push(stage)
+    graph.addCells(stage)
     return stage;
   }
   if(typeOfNode == "Topics"){
     var topicElement = createTopics(childNode['@id'], childNode['name'])
     const linkStageToTopics = makeLink(parentNode, topicElement)
     topicElement.prop('name/first', "Topics")
-    arr.push(topicElement, linkStageToTopics)
+    arr.push(topicElement,linkStageToTopics)
+    graph.addCells(topicElement, linkStageToTopics)
     return topicElement;
   }
   if(typeOfNode == "Outcomes"){
     const outcomeElement = createOutcomes(childNode['@id'], childNode['name'])
     const linkTopicToOutcome = makeLink(parentNode, outcomeElement)
     outcomeElement.prop('name/first', "Outcomes")
-    arr.push(outcomeElement, linkTopicToOutcome)
+    arr.push(outcomeElement,linkTopicToOutcome)
+    graph.addCells(outcomeElement, linkTopicToOutcome)
     return outcomeElement;
   }
   if(typeOfNode == "Activities"){
     const activityElement = createActivities(childNode['@id'], childNode['name'])
     const linkOutcomeToActivity = makeLink(parentNode, activityElement)
     activityElement.prop('name/first', "Activities")
-    arr.push(activityElement, linkOutcomeToActivity)
+    arr.push(activityElement,linkOutcomeToActivity)
+    graph.addCells(activityElement, linkOutcomeToActivity)
     return activityElement;
   }
   if(typeOfNode == "Considerations"){
@@ -345,14 +354,16 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       considerationElement = multiParentElementIds[childNode['@id']];
       const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
       arr.push(linkOutcomeToConsideration)
+      graph.addCells(linkOutcomeToConsideration)
     }else{
       considerationElement = createConsiderations(childNode['@id'], childNode['name'])
-      var portName = ['Definition']
-      const embedButton = buttonView("Definition", considerationElement, portName)
+      graph.addCells(considerationElement)
+      const embedButton = buttonView("Definition", considerationElement)
       multiParentElementIds[childNode['@id']] = considerationElement;
       considerationElement.prop('name/first', "Considerations")
       const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-      arr.push(considerationElement, linkOutcomeToConsideration)
+      graph.addCells(linkOutcomeToConsideration)
+      arr.push(considerationElement,linkOutcomeToConsideration)
     }
     return considerationElement;
   }
