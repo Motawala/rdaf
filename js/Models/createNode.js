@@ -71,7 +71,7 @@ function createStage(id, name){
 
 function createTopics(id, name){
   const textWidth = name.length * 8; // Approximate width based on font size and average character width
-  const width = Math.max(textWidth, 0); // Ensure a minimum width to accommodate shorter text
+  const width = Math.max(textWidth, 100); // Ensure a minimum width to accommodate shorter text
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
 
@@ -158,8 +158,7 @@ function createOutcomes(id, name){
     },
     attrs: {
       label: {
-        fontWeight: "bold",
-        fontSize: 15,
+        fontSize: 17,
         fontFamily: "sans-serif",
         fill: "black",
         paintOrder: "stroke",
@@ -254,11 +253,6 @@ function setPorts(el, ports) {
 
   }
 
-let uniqueButtonIdCounter = 1;
-
-function generateUniqueButtonId() {
-    return 'button_' + uniqueButtonIdCounter++;
-}
 
 
 //Creates The ports on the Elements

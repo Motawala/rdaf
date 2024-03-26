@@ -1,78 +1,13 @@
 const { dia, elementTools, shapes, linkTools, util } = joint;
-// Create a new directed graph
-const graph = new dia.Graph({}, { cellNamespace: shapes });
+var graph;
+var paper;
+var root = [];
+var models = [];
+var duplicateFrame = [];
+var createdConsidearitonElementIds = new Set();   //This set stores all the multi linked consideration element in which the definition button is already embedded, to prevent dup ids
+var multiParentElementIds = {}
+init();
 
-var CustomLinkView = joint.dia.LinkView.extend({
-  // custom interactions:
-  pointerdblclick: function(evt, x, y) {
-      this.addVertex(x, y);
-  },
-  contextmenu: function(evt, x, y) {
-      this.addLabel(x, y);
-  },
-
-  // custom options:
-  options: joint.util.defaults({
-      doubleLinkTools: true,
-  }, joint.dia.LinkView.prototype.options)
-});
-
-
-// Create a new paper, which is a wrapper around SVG element
-const paper = new dia.Paper({
-  interactive: { vertexAdd: false }, // disable default vertexAdd interaction
-  el: document.getElementById('graph-container'),
-  model: graph,
-  linkView: CustomLinkView,
-  interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
-  width: 10000, //window.innerWidth,
-  height: 50000,//window.innerHeight,
-  overflow: true,
-  gridSize: 10,
-  perpendicularLinks: true,
-  drawGrid: true,
-  background: {
-    color: '#f9f9f9'
-  },
-  defaultLinkAnchor: {
-    name: 'connectionLength'
-  },
-  interactive: {
-      linkMove: false,
-      labelMove: false
-  },
-  async: true,
-  //Viewport function supports collapsing/uncollapsing behaviour on paper
-  viewport: function(view) {
-    // Return true if model is not hidden
-    return !view.model.get('hidden');
-  }
-});
-
-// Fit the paper content to the container size
-paper.transformToFitContent()
-
-
-let duplicateFrame = []
-
-/*
-  There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
-*/
-paper.on('element:pointerclick', function(view, evt) {
-    evt.stopPropagation();
-    if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
-      toggleBranch(view.model);
-    }
-    // resetting the layout here has an effect after collapsing and then moving the topic nodes
-    // manually to be closer (it moves them so the expanded nodes will fit if you re-expand after
-    // moving. It doesn't seem to have any effect after just collapsing a node's children
-    // though. So I think it has promise as an approach but more work is needed to figure out
-    // how to get the layout to redraw everytime the way we want it to
-})
-
-
-var root = []
-var models = []
 function buildTheGraph(){
   var Elements = []
     fetch('./data/json-ld/graph.jsonld')
@@ -117,34 +52,31 @@ function buildTheGraph(){
   frameArray.forEach(node =>{
     if(node['additionalType'] == "RdAF Stage"){
       var stage = linkNodes(node, Elements, "", "Stages")
-      stage.position(100,100)
       graph.addCells(stage)
       root.push(stage)
-      //Elements.push(stage)
       topic = node['sunyrdaf:includes']
       if(Array.isArray(topic)){
-        topic.forEach(topics =>{
+        topic.forEach(topicObj =>{
         var tools = [];
-        if(topics){
+        if(topicObj){
           //Creates the topic
-          var topicElement = linkNodes(topics, Elements, stage, "Topics")
-          const w = topicElement.size().width
-          const h = topicElement.size().height
-          topicElement.size(w + 200, h)
+          var topicElement = linkNodes(topicObj, Elements, stage, "Topics")
+          const width = topicElement.size().width
+          const height = topicElement.size().height
+          topicElement.size(width + 200, height)
           Elements.push(topicElement)
-          //createTextBlock(topicElement, node, stage)
-          if(topics["sunyrdaf:includes"]){
+          if(topicObj["sunyrdaf:includes"]){
             //Creates the consideration button if a topic includes consideration
             var port3 = createPort('Considerations', 'out');
             // Add custom tool buttons for each port
-            topicElement.addPort(port3);// Adds a port to the element
+            topicElement.addPort(port3);        // Adds a port to the element
             const considerationButton = createConsiderationButton(port3)
             considerationButton.options.x = "85%"
-            tools.push(considerationButton)//Create the button
+            tools.push(considerationButton)       //Create the button
             graph.addCells(topicElement);
             toolsView = new joint.dia.ToolsView({ tools: [tools]});
             topicElement.findView(paper).addTools(toolsView);//Embed the tools view into the element view
-            createTextBlock(topicElement,topics["sunyrdaf:includes"], stage )
+            createTextBlock(topicElement,topicObj["sunyrdaf:includes"], stage )
           }
           var port2 = createPort('Outcomes', 'out');
           // Add custom tool buttons for each port
@@ -155,8 +87,8 @@ function buildTheGraph(){
           graph.addCells(topicElement);
           toolsView = new joint.dia.ToolsView({ tools: tools});
           topicElement.findView(paper).addTools(toolsView);
-          checkOutcomes(topics, Elements, topicElement)
-          createTextBlock(topicElement,topics, stage )
+          checkOutcomes(topicObj, Elements, topicElement)
+          createTextBlock(topicElement,topicObj, stage )
         }
       })
     }
@@ -166,7 +98,7 @@ function buildTheGraph(){
   graph.addCells(Elements)
   // Perform layout after setting positions
   models = Elements
-  ayout = doLayout();
+  layout = doLayout();
   })
 }
 
@@ -182,10 +114,10 @@ function checkOutcomes(topic, arr, parentNode){
     if(key.startsWith('sunyrdaf')){
       if(key == "sunyrdaf:generates"){
         if(Array.isArray(topic[key])){
-          topic[key].forEach(outcomes =>{
-            const outcomeElement = linkNodes(outcomes, arr, parentNode, "Outcomes")
+          topic[key].forEach(outcome =>{
+            const outcomeElement = linkNodes(outcome, arr, parentNode, "Outcomes")
             //Check for activities in the outcome
-            checkForActivities(outcomes, arr, outcomeElement)
+            checkForActivities(outcome, arr, outcomeElement)
           })
         }else{ //Condition if the topic has generated only one outcome
           const outcomeElement = linkNodes(topic[key], arr, parentNode, "Outcomes")
@@ -204,38 +136,6 @@ function checkOutcomes(topic, arr, parentNode){
 
 
 
-function createTextBlock(element, node, parentNode){
-  var parentElementView = paper.findViewByModel(parentNode)
-  var elementView = paper.findViewByModel(element)
-  var bbox = parentElementView.model.getBBox();
-  var paperRect1 = paper.localToPaperRect(bbox);
-  // Draw an HTML rectangle above the element.
-  var div = document.createElement('div');
-  parentElementView.el.style.position = "relative"
-  div.style.position = 'absolute';
-  div.style.background = 'white';
-  div.textContent = node['description']
-  var length = element * 2
-  div.style.width = (300) + 'px';
-  div.style.height = (length) + 'px';
-  div.style.border = "1px solid black";
-  div.style.fontWeight = "bold"
-  div.style.fontSize = "20px"
-  div.id = element.id
-  div.style.fontFamily = "Cambria"
-  div.style.lineBreak = 0.5
-  div.style.visibility = "hidden"
-  div.style.backgroundColor = "lightgrey"
-  if(node['description'] != null){
-    paper.el.appendChild(div);
-  }else{
-    if(elementView.model.attributes.name['first'] == "Considerations"){
-      elementView.removeTools()
-    }
-    console.warn()
-  }
-
-}
 
 //Function to create considerations nodes
 function checkForConsiderations(outcome, arr, parentNode){
@@ -292,8 +192,8 @@ function checkForConsiderations(outcome, arr, parentNode){
 
 //Function to Create activity nodes that are the results of the ouctomes generated
 function checkForActivities(outcome, arr, parentNode){
-  var portName = ['NT1', "PG1", "AC1"]
-  const embedButton = buttonView("Activities", parentNode, portName)
+  var portNameList = ['NT1', "PG1", "AC1"]
+  const embedButton = buttonView("Activities", parentNode, portNameList)
   for (const key in outcome){
     if(key.startsWith('sunyrdaf')){
       if(key == "sunyrdaf:resultsFrom"){
@@ -314,11 +214,9 @@ function checkForActivities(outcome, arr, parentNode){
         }
       }else if(key == "sunyrdaf:includes"){
         const consideration = checkForConsiderations(outcome[key], arr, parentNode)
-        var portName = ['Definition']
         if(consideration){
-          //const embedButton = buttonView("Definition", consideration, portName)
         }else{
-          console.error("Considerations Undefined")
+          //Error displayed is Considerations Undefined (Just for Debugging)
         }
       }else if(key == "sunyrdaf:extends"){
         //Instead Of creating an element and a link for the subtopic, we have just used
@@ -371,53 +269,69 @@ function checkForSubTopics(outcome, arr, parentNode){
   }
 }
 
-const createdElementIds = new Set();
 /*
 This function takes the nodes and links it
+* Create and add node for the JointJS graph and link it to its parent
+* @param {Object} childNode - an object in the JSON-LD graph
+* @param {Object[]} arr - the list of elements in the JointJS graph
+* @param {Object} parentNode - the parent object in the JSON-LD graph
+* @param {string} typeOfNode - the name of the type of node we are linking
+* @return the newly created node
 */
 function linkNodes(childNode, arr, parentNode, typeOfNode){
   if(typeOfNode == "Stages"){
     var stage = createStage(childNode['@id'], childNode['name'])
     stage.prop('name/first', "Stages")
-    //setPorts(stage, ['Topics']);
     arr.push(stage)
-    //createTextBlock(stage, childNode, childNode)
+    graph.addCells(stage)
     return stage;
   }
   if(typeOfNode == "Topics"){
     var topicElement = createTopics(childNode['@id'], childNode['name'])
-    const linkStageToTopics = makeLink(parentNode, topicElement)
+    var linkStageToTopics = makeLink(parentNode, topicElement)
     topicElement.prop('name/first', "Topics")
     arr.push(topicElement, linkStageToTopics)
+    graph.addCells(topicElement, linkStageToTopics)
     return topicElement;
   }
   if(typeOfNode == "Outcomes"){
-    const outcomeElement = createOutcomes(childNode['@id'], childNode['name'])
-    const linkTopicToOutcome = makeLink(parentNode, outcomeElement)
+    var outcomeElement = createOutcomes(childNode['@id'], childNode['name'])
+    var linkTopicToOutcome = makeLink(parentNode, outcomeElement)
     outcomeElement.prop('name/first', "Outcomes")
     arr.push(outcomeElement, linkTopicToOutcome)
+    graph.addCells(outcomeElement, linkOutcomeToActivity)
     return outcomeElement;
   }
   if(typeOfNode == "Activities"){
-    const activityElement = createActivities(childNode['@id'], childNode['name'])
-    const linkOutcomeToActivity = makeLink(parentNode, activityElement)
+    var activityElement = createActivities(childNode['@id'], childNode['name'])
+    var linkOutcomeToActivity = makeLink(parentNode, activityElement)
     activityElement.prop('name/first', "Activities")
     arr.push(activityElement, linkOutcomeToActivity)
+    graph.addCells(activityElement, linkOutcomeToActivity)
+    createDropDownMenu(activityElement)
     return activityElement;
   }
   if(typeOfNode == "Considerations"){
-    const considerationElement = createConsiderations(childNode['@id'], childNode['name'])
-    const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-    if (createdElementIds.has(childNode['@id'])) {
+    var considerationElement
+    if (createdConsidearitonElementIds.has(childNode['@id'])) {
       console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if(multiParentElementIds[childNode['@id']]){
+        considerationElement = multiParentElementIds[childNode['@id']];
+        var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
+        considerationElement.prop('name/first', "Considerations")
+        arr.push(considerationElement, linkOutcomeToConsideration)
+        graph.addCells(considerationElement, linkOutcomeToActivity)
+      }
     }else{
-      var portName = ['Definition']
-      const embedButton = buttonView("Definition", considerationElement, portName)
-      createdElementIds.add(childNode['@id'])
-    }
-    considerationElement.prop('name/first', "Considerations")
-    arr.push(considerationElement, linkOutcomeToConsideration)
+      considerationElement = createConsiderations(childNode['@id'], childNode['name'])
+      const embedButton = buttonView("Definition", considerationElement)
+      createdConsidearitonElementIds.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = considerationElement
+      var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
+      considerationElement.prop('name/first', "Considerations")
+      arr.push(considerationElement, linkOutcomeToConsideration)
 
+    }
     return considerationElement;
   }
   if(typeOfNode == "Subtopic"){
@@ -450,11 +364,8 @@ function doLayout() {
   layout = joint.layout.DirectedGraph.layout(visibleElements, {
     setVertices: false,
     rankDir: 'LR',
-    nodeSep: 50, // Increase the separation between adjacent nodes
-    edgeSep: 10, // Increase the separation between adjacent edges
-    rankSep: 0, // Increase the separation between node layers
     marginX: 50, // Add margin to the left and right of the graph
-    marginY: 50, // Add margin to the top and bottom of the graph
+    marginY: 0, // Add margin to the top and bottom of the graph
     resizeClusters: false,
     setPosition: (element, position) => {
       // Align elements to the left by setting their x-coordinate
@@ -467,7 +378,44 @@ function doLayout() {
 
 buildTheGraph();
 
-//doLayout();
+function init(){
+// Create a new directed graph
+graph = new dia.Graph({}, { cellNamespace: shapes });
+
+// Create a new paper, which is a wrapper around SVG element
+paper = new dia.Paper({
+  interactive: { vertexAdd: false }, // disable default vertexAdd interaction
+  el: document.getElementById('graph-container'),
+  model: graph,
+  interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
+  width: 10000, //window.innerWidth,
+  height: 50000,//window.innerHeight,
+  overflow: true,
+  gridSize: 10,
+  perpendicularLinks: true,
+  drawGrid: true,
+  background: {
+    color: '#f9f9f9'
+  },
+  defaultLinkAnchor: {
+    name: 'connectionLength'
+  },
+  interactive: {
+      linkMove: false,
+      labelMove: false
+  },
+  async: true,
+  //Viewport function supports collapsing/uncollapsing behaviour on paper
+  viewport: function(view) {
+    // Return true if model is not hidden
+    return !view.model.get('hidden');
+  }
+});
+
+// Fit the paper content to the container size
+paper.transformToFitContent()
+
+}
 
 
 
