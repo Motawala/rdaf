@@ -115,7 +115,7 @@ function createConsiderations(id, name){
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width,
+      width: width + 100,
       height: 35
     },
     attrs: {
@@ -126,6 +126,8 @@ function createConsiderations(id, name){
         fill: "black",
         stroke: "#333333",
         paintOrder: "stroke",
+        type: 'TextBlock',
+        dx:0,
         text: name,
       },
       body: {
@@ -165,6 +167,7 @@ function createOutcomes(id, name){
         text: name,
       },
       body: {
+        type:'TextBlock',
         strokeWidth: 2,
         fill: "	#ffcccc",
         cursor: "grab"
@@ -183,17 +186,13 @@ function createOutcomes(id, name){
 
 function createActivities(id, name){
 
-  const textWidth = name.length * 8; // Approximate width based on font size and average character width
+  const textWidth = name.length * 10; // Approximate width based on font size and average character width
   const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
   const node =  new joint.shapes.standard.Rectangle({
       id: id,
-      //position: {
-      //  x: 250,
-      //  y: 500
-      //},
       size: {
-        width: width,
-        height: 70
+        width: width + 170,
+        height: 120
       },
       attrs: {
         label: {
@@ -221,6 +220,211 @@ function createActivities(id, name){
   return node
 }
 
+function createOutputs(id, name){
+  if(typeof name == 'string'){
+    var textWidth = name.length * 10
+  }else{
+    var textWidth = 200
+  }
+  const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
+  const node =  new joint.shapes.standard.Rectangle({
+    id: id,
+    size: {
+      width: width + 100,
+      height: 35
+    },
+    attrs: {
+      label: {
+      //fontWeight: "bold",
+        fontSize: 15,
+        fontFamily: "sans-serif",
+        fill: "black",
+        stroke: "#333333",
+        paintOrder: "stroke",
+        type: 'TextBlock',
+        dx:0,
+        text: name,
+      },
+      body: {
+        strokeWidth: 2,
+        fill: "rgb(202, 176, 144)",
+        cursor: "grab"
+      },
+    },
+    ports:{
+      id: "Outputs",
+      items: []
+    }
+  });
+  node.set('hidden', true);
+  node.set('collapsed', false)
+  return node
+}
+
+function createParticipants(id, name){
+  if(typeof name == 'string'){
+    var textWidth = name.length * 10
+  }else{
+    var textWidth = 200
+  }
+  const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
+  const node =  new joint.shapes.standard.Rectangle({
+    id: id,
+    size: {
+      width: width + 100,
+      height: 35
+    },
+    attrs: {
+      label: {
+      //fontWeight: "bold",
+        fontSize: 15,
+        fontFamily: "sans-serif",
+        fill: "black",
+        stroke: "#333333",
+        paintOrder: "stroke",
+        type: 'TextBlock',
+        dx:0,
+        text: name,
+      },
+      body: {
+        strokeWidth: 2,
+        fill: "rgb(202, 176, 144)",
+        cursor: "grab"
+      },
+    },
+    ports:{
+      id: "Outputs",
+      items: []
+    }
+  });
+  node.set('hidden', true);
+  node.set('collapsed', false)
+  return node
+}
+
+function createRoles(id, name){
+  if(typeof name == 'string'){
+    var textWidth = name.length * 10
+  }else{
+    var textWidth = 200
+  }
+  const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
+  const node =  new joint.shapes.standard.Rectangle({
+    id: id,
+    size: {
+      width: width + 100,
+      height: 35
+    },
+    attrs: {
+      label: {
+      //fontWeight: "bold",
+        fontSize: 15,
+        fontFamily: "sans-serif",
+        fill: "black",
+        stroke: "#333333",
+        paintOrder: "stroke",
+        type: 'TextBlock',
+        dx:0,
+        text: name,
+      },
+      body: {
+        strokeWidth: 2,
+        fill: "rgb(202, 176, 144)",
+        cursor: "grab"
+      },
+    },
+    ports:{
+      id: "Roles",
+      items: []
+    }
+  });
+  node.set('hidden', true);
+  node.set('collapsed', false)
+  return node
+}
+
+function createMethods(id, name){
+  if(typeof name == 'string'){
+    var textWidth = name.length * 10
+  }else{
+    var textWidth = 200
+  }
+  const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
+  const node =  new joint.shapes.standard.Rectangle({
+    id: id,
+    size: {
+      width: width + 100,
+      height: 35
+    },
+    attrs: {
+      label: {
+      //fontWeight: "bold",
+        fontSize: 15,
+        fontFamily: "sans-serif",
+        fill: "black",
+        stroke: "#333333",
+        paintOrder: "stroke",
+        type: 'TextBlock',
+        dx:0,
+        text: name,
+      },
+      body: {
+        strokeWidth: 2,
+        fill: "rgb(202, 176, 144)",
+        cursor: "grab"
+      },
+    },
+    ports:{
+      id: "Methods",
+      items: []
+    }
+  });
+  node.set('hidden', true);
+  node.set('collapsed', false)
+  return node
+}
+
+function createResources(id, name){
+  if(typeof name == 'string'){
+    var textWidth = name.length * 10
+  }else{
+    var textWidth = 200
+  }
+  const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
+  const node =  new joint.shapes.standard.Rectangle({
+    id: id,
+    size: {
+      width: width + 100,
+      height: 35
+    },
+    attrs: {
+      label: {
+      //fontWeight: "bold",
+        fontSize: 15,
+        fontFamily: "sans-serif",
+        fill: "black",
+        stroke: "#333333",
+        paintOrder: "stroke",
+        type: 'TextBlock',
+        dx:0,
+        text: name,
+      },
+      body: {
+        strokeWidth: 2,
+        fill: "rgb(57, 187, 255)",
+        cursor: "grab"
+      },
+    },
+    ports:{
+      id: "Resources",
+      items: []
+    }
+  });
+  node.set('hidden', true);
+  node.set('collapsed', false)
+  return node
+}
+
 function setPorts(el, ports) {
     let width = 0;
     const rdafPorts = ports.map((port, index) => {
@@ -232,7 +436,6 @@ function setPorts(el, ports) {
         attrs: {
           portLabel: {
             text: `${port}`,
-
           }
         },
         args: {
@@ -244,13 +447,10 @@ function setPorts(el, ports) {
     if (rdafPorts.length > 0) {
       width += PORT_GAP;
     }
-
     width += 2 * PORT_WIDTH;
-
     el.prop(["ports", "items"], [...rdafPorts], {
       rewrite: true
     });
-
   }
 
 
@@ -262,7 +462,7 @@ function createPort(id,group, name) {
     label: {
       text: name,
       position: {
-        name: 'left'
+        name: 'right'
       },
       markup: [{
         tagName: 'text',

@@ -3,7 +3,7 @@
 There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
 */
 paper.on('element:pointerclick', function(view, evt) {
-    evt.stopPropagation();
+    //evt.stopPropagation();
     if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
     toggleBranch(view.model);
     }
@@ -161,7 +161,7 @@ function radioButtonEvents(elementView, port){
             //When clicked on Achieved, hide the activity button
             if(activityButton.style.visibility == "visible" || considerationButton.style.visibility == "visible"){
                 var rectElement = (elementView.el.querySelector('rect'))
-                var width = parseInt(rectElement.getAttribute('width')) - 90
+                var width = parseInt(rectElement.getAttribute('width')) - 115
                 rectElement.setAttribute('width', width)
                 //This condition is applied when user wants to hide all the elements including Activities and Considerations
                 const OutboundLinks = graph.getConnectedLinks(elementView.model, {outbound:true})
@@ -203,7 +203,7 @@ function radioButtonEvents(elementView, port){
             //When clicked on In Progress button, show the activity button
             if(activityButton.style.visibility == "hidden" || considerationButton.style.visibility == "hidden" && (activityButton || considerationButton)){
                 var rectElement = (elementView.el.querySelector('rect'))
-                var width = parseInt(rectElement.getAttribute('width')) + 90
+                var width = parseInt(rectElement.getAttribute('width')) + 115
                 rectElement.setAttribute('width', width)
                 updateAnchorConnection(elementView.model)
             }else{
@@ -220,7 +220,7 @@ function radioButtonEvents(elementView, port){
             //When clicked on Not Started Button, show the activity button
             if(activityButton.style.visibility == "hidden" || considerationButton.style.visibility == "hidden" && (activityButton || considerationButton)){
                 var rectElement = (elementView.el.querySelector('rect'))
-                var width = parseInt(rectElement.getAttribute('width')) + 90
+                var width = parseInt(rectElement.getAttribute('width')) + 115
                 rectElement.setAttribute('width', width)
                 updateAnchorConnection(elementView.model)
             }else{
@@ -383,6 +383,7 @@ paper.on('cell:mouseover', function(cellView) {
       //From the element view look for the element tools
         var toolsArray = cellView._toolsView.tools
         toolsArray.forEach(element => {
+            element
             if (element.childNodes && element.childNodes.button) {
                     const subtopicButton = element.$el[0]
                     subtopicButton.addEventListener('mouseover', function() {
@@ -408,10 +409,10 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                         else if(element.childNodes.button.id == "Activities"){
                                 element.childNodes.button.setAttribute('fill', 'lightgrey')
-                                var textBlock = document.getElementById(cellView.model.id)
+                                var textBlock = document.getElementById("Activities" + cellView.model.id)
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
-                                //textBlock.style.visibility = "visible"
+                                textBlock.style.visibility = "visible"
                         }
                         else if(element.childNodes.button.id == "Considerations"){
                                 element.childNodes.button.setAttribute('fill', 'lightgrey')
@@ -427,6 +428,43 @@ paper.on('cell:mouseover', function(cellView) {
                             textBlock.style.top = ((paperRect1.y) + 40) + 'px';
                             textBlock.style.visibility = "visible"
                         }
+                        else if(element.childNodes.button.id == "Outputs"){
+                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            var textBlock = document.getElementById("Outputs" + cellView.model.id)
+                            textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+                            textBlock.style.visibility = "visible"
+                        }
+                        else if(element.childNodes.button.id == "Participants"){
+                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            var textBlock = document.getElementById("Participants" + cellView.model.id)
+                            textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+                            textBlock.style.visibility = "visible"
+                        }
+
+                        else if(element.childNodes.button.id == "Methods"){
+                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            var textBlock = document.getElementById("Methods" + cellView.model.id)
+                            textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+                            textBlock.style.visibility = "visible"
+                        }
+                        else if(element.childNodes.button.id == "Roles"){
+                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            var textBlock = document.getElementById("Roles" + cellView.model.id)
+                            textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+                            textBlock.style.visibility = "visible"
+                        }
+                        else if(element.childNodes.button.id == "Resources"){
+                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            var textBlock = document.getElementById("Resources" + cellView.model.id)
+                            textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+                            textBlock.style.visibility = "visible"
+                        }
+
                         else{
                             console.log()
                         }
@@ -464,7 +502,7 @@ paper.on('cell:mouseover', function(cellView) {
                     }
                     else if(element.childNodes.button.id == "Activities"){
                         element.childNodes.button.setAttribute('fill', '#ffffb3')
-                        var textBlock = document.getElementById(cellView.model.id)
+                        var textBlock = document.getElementById("Activities" + cellView.model.id)
                         textBlock.style.visibility = "hidden"
                     }
                     else if(element.childNodes.button.id == "Considerations"){
@@ -475,10 +513,33 @@ paper.on('cell:mouseover', function(cellView) {
                         var textBlock = document.getElementById(cellView.model.id)
                         textBlock.style.visibility = "hidden"
                     }
-                    else{
-                        var textBlock = document.getElementById(cellView.model.id)
+                    else if(element.childNodes.button.id == "Outputs"){
+                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        var textBlock = document.getElementById("Outputs" + cellView.model.id)
                         textBlock.style.visibility = "hidden"
                     }
+                    else if(element.childNodes.button.id == "Participants"){
+                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        var textBlock = document.getElementById("Participants" + cellView.model.id)
+                        textBlock.style.visibility = "hidden"
+                    }
+                    else if(element.childNodes.button.id == "Roles"){
+                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        var textBlock = document.getElementById("Roles" + cellView.model.id)
+                        textBlock.style.visibility = "hidden"
+                    }
+                    else if(element.childNodes.button.id == "Resources"){
+                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        var textBlock = document.getElementById("Resources" + cellView.model.id)
+                        textBlock.style.visibility = "hidden"
+                    }
+                    else if(element.childNodes.button.id == "Methods"){
+                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        var textBlock = document.getElementById("Methods" + cellView.model.id)
+                        textBlock.style.visibility = "hidden"
+                    }
+
+
                 });
             }else {
                 console.log();

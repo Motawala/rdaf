@@ -6,7 +6,7 @@ function updateAnchorConnection(element){
                     name: 'right',
                     args: {
                         rotate: false,
-                        dx: 90,            //100 because the width of the element was increase by 100 (offset 100)
+                        dx: 115,            //100 because the width of the element was increase by 100 (offset 100)
                         dy: 0
                     }
                 }
@@ -95,7 +95,9 @@ function setElementsPosition(element, position){
         element.set('position', { x: distance , y: position.y});
         }
     }else{
+        const verticalSpacing = 100;
         const parentElement = graph.getPredecessors(element)[0]
+        var h = (element.getBBox().height + verticalSpacing)/2
         if(parentElement){
         const parentPositionX = parentElement.position().x
         const parentSize = parseInt(parentElement.size().width)

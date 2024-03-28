@@ -118,11 +118,13 @@ function checkOutcomes(topic, arr, parentNode){
             const outcomeElement = linkNodes(outcome, arr, parentNode, "Outcomes")
             //Check for activities in the outcome
             checkForActivities(outcome, arr, outcomeElement)
+            createTextBlock(outcomeElement, outcome, parentNode)
           })
         }else{ //Condition if the topic has generated only one outcome
           const outcomeElement = linkNodes(topic[key], arr, parentNode, "Outcomes")
           //Check for activities in the outcome
           checkForActivities(topic[key], arr, outcomeElement)
+          createTextBlock(outcomeElement, topic[key], parentNode)
         }
       }else if(key == "sunyrdaf:includes"){
         //Creates consideration elements if a topic includes considerations
@@ -190,26 +192,125 @@ function checkForConsiderations(outcome, arr, parentNode){
   }
 }
 
+
+
+//*******A lot to chnage in this function as rest of the elements that are yet to be introduced are linked to this.
 //Function to Create activity nodes that are the results of the ouctomes generated
 function checkForActivities(outcome, arr, parentNode){
   var portNameList = ['NT1', "PG1", "AC1"]
-  const embedButton = buttonView("Activities", parentNode, portNameList)
+  const embedButton = buttonView("Activities", parentNode)
   for (const key in outcome){
     if(key.startsWith('sunyrdaf')){
       if(key == "sunyrdaf:resultsFrom"){
         if(Array.isArray(outcome)){ //Conditions to create multiple activities
           outcome[key].forEach(activity =>{
+            console.log(activity)
             const activityElement = linkNodes(activity, arr, parentNode, "Activities")
+            if(activity['sunyrdaf:extends']){
+              var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, parentNode)
+              subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
+            }
+            if(activity['sunyrdaf:generates']){
+              activity['sunyrdaf:generates'].forEach(node =>{
+                var outputElement = linkNodes(node, arr, activityElement, "Outputs")
+                createTextBlock(outputElement, node, activityElement)
+              })
+            }
+            if(activity['sunyrdaf:includes']){
+              activity['sunyrdaf:includes'].forEach(node =>{
+                if(node['@type'] == "sunyrdaf:Method" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Method"){
+                  var methodElement = linkNodes(node, arr, activityElement, "Methods")
+                  console.log(methodElement)
+                  createTextBlock(methodElement, node, activityElement)
+                }
+                if(node['@type'] == "sunyrdaf:Participant" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Participant"){
+                  var participantElement = linkNodes(node, arr, activityElement, "Participants")
+                  createTextBlock(participantElement, node, activityElement)
+                }
+                if(node['@type'] == "sunyrdaf:Role" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Role"){
+                  var roleElement = linkNodes(node, arr, activityElement, "Roles")
+                  createTextBlock(roleElement, node, activityElement)
+                }
+                if(node['@type'] == "sunyrdaf:Resource" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Resource"){
+                  var resourceElement = linkNodes(node, arr, activityElement, "Resources")
+                  createTextBlock(resourceElement, node, activityElement)
+                }
+              })
+            }
           })
         }else{// Condition to create a single activity
           if(outcome[key]['name'] == undefined){
             duplicateFrame.forEach(nodes =>{
               if(nodes['@id'] == outcome[key]){
                 const activityElement = linkNodes(nodes, arr, parentNode, "Activities")
+                if(nodes['sunyrdaf:extends']){
+                  var subTopic = checkForSubTopics(nodes['sunyrdaf:extends'], arr, activityElement)
+                  subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
+                }
+                if(nodes['sunyrdaf:generates']){
+                  nodes['sunyrdaf:generates'].forEach(node =>{
+                    var outputElement = linkNodes(node, arr, activityElement, "Outputs")
+                    createTextBlock(outputElement, node, activityElement)
+                  })
+                }
+                if(nodes['sunyrdaf:includes']){
+                  nodes['sunyrdaf:includes'].forEach(node =>{
+                    if(node['@type'] == "sunyrdaf:Method" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Method"){
+                      var methodElement = linkNodes(node, arr, activityElement, "Methods")
+                      console.log(methodElement)
+                      createTextBlock(methodElement, node, activityElement)
+                    }
+                    if(node['@type'] == "sunyrdaf:Participant" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Participant"){
+                      var participantElement = linkNodes(node, arr, activityElement, "Participants")
+                      createTextBlock(participantElement, node, activityElement)
+                    }
+                    if(node['@type'] == "sunyrdaf:Role" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Role"){
+                      var roleElement = linkNodes(node, arr, activityElement, "Roles")
+                      createTextBlock(roleElement, node, activityElement)
+                    }
+                    if(node['@type'] == "sunyrdaf:Resource" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Resource"){
+                      var resourceElement = linkNodes(node, arr, activityElement, "Resources")
+                      createTextBlock(resourceElement, node, activityElement)
+                    }
+                  })
+                }
               }
             })
           }else{
             const activityElement = linkNodes(outcome[key], arr, parentNode, "Activities")
+            if(outcome[key]['sunyrdaf:extends']){
+              var subTopic = checkForSubTopics(outcome[key]['sunyrdaf:extends'], arr, parentNode)
+              subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
+            }
+            if(outcome[key]['sunyrdaf:generates']){
+              outcome[key]['sunyrdaf:generates'].forEach(node =>{
+                var outputElement = linkNodes(node, arr, activityElement, "Outputs")
+                createTextBlock(outputElement, node, activityElement)
+              })
+            }
+            const c = outcome[key]
+            console.log(c['sunyrdaf:includes'])
+            if(c['sunyrdaf:includes']){
+              c['sunyrdaf:includes'].forEach(node =>{
+                if(node['@type'] == "sunyrdaf:Method" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Method"){
+                  var methodElement = linkNodes(node, arr, activityElement, "Methods")
+                  console.log(methodElement)
+                  createTextBlock(methodElement, node, activityElement)
+                }
+                if(node['@type'] == "sunyrdaf:Participant" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Participant"){
+                  var participantElement = linkNodes(node, arr, activityElement, "Participants")
+                  createTextBlock(participantElement, node, activityElement)
+                }
+                if(node['@type'] == "sunyrdaf:Role" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Role"){
+                  var roleElement = linkNodes(node, arr, activityElement, "Roles")
+                  createTextBlock(roleElement, node, activityElement)
+                }
+                if(node['@type'] == "sunyrdaf:Resource" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Resource"){
+                  var resourceElement = linkNodes(node, arr, activityElement, "Resources")
+                  createTextBlock(resourceElement, node, activityElement)
+                }
+              })
+            }
           }
         }
       }else if(key == "sunyrdaf:includes"){
@@ -224,32 +325,16 @@ function checkForActivities(outcome, arr, parentNode){
         var subTopic = checkForSubTopics(outcome[key], arr, parentNode);
         if(subTopic != undefined){
           //This creates the si
-          var nodeCellView = paper.findViewByModel(parentNode)
-          var bbox = nodeCellView.model.getBBox();
-          var paperRect1 = paper.localToPaperRect(bbox);
-          // Draw an HTML rectangle above the element.
-          var div = document.createElement('div');
-          nodeCellView.el.style.position = "relative"
-          div.style.position = 'absolute';
-          div.style.background = 'white';
-          div.textContent = subTopic
-          var length = subTopic * 2
-          div.style.width = ((paperRect1.width)/2) + 'px';
-          div.style.height = (length) + 'px';
-          div.style.border = "1px solid black";
-          div.style.fontWeight = "bold"
-          div.style.fontSize = "20px"
-          div.id = parentNode.id
-          div.style.fontFamily = "Cambria"
-          div.style.lineBreak = 0.5
-          div.style.visibility = "hidden"
-          paper.el.appendChild(div);
+          subTopicTextBlock(subTopic, parentNode)
 
         }
       }
     }
   }
 }
+
+
+
 //This function creates the subtopic
 /*
   For now the subtopics are linked to its paretnode because if not linked it distracts the directed graph.
@@ -308,6 +393,8 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     activityElement.prop('name/first', "Activities")
     arr.push(activityElement, linkOutcomeToActivity)
     graph.addCells(activityElement, linkOutcomeToActivity)
+    const portNameList = ['Participants', 'Methods', "Roles", "Resources", "Outputs", "RDaF Subtopic"]
+    buttonView(portNameList, activityElement)
     createDropDownMenu(activityElement)
     return activityElement;
   }
@@ -347,6 +434,47 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       description = category + ": " + childNode['name'] + ": " + childNode['description']
     }
     return description
+  }
+
+  if(typeOfNode == "Outputs"){
+    var outputElement = createOutputs(childNode['@id'], childNode['name'])
+    var linkOutputToActivity = makeLink(parentNode, outputElement)
+    outputElement.prop('name/first', "Outputs")
+    arr.push(outputElement, linkOutputToActivity)
+    graph.addCells(outputElement, linkOutputToActivity)
+    return outputElement;
+  }
+  if(typeOfNode == "Methods"){
+    var methodElement = createMethods(childNode['@id'], childNode['name'])
+    var linkMethodToActivity = makeLink(parentNode, methodElement)
+    methodElement.prop('name/first', "Methods")
+    arr.push(methodElement, linkMethodToActivity)
+    graph.addCells(methodElement, linkMethodToActivity)
+    return methodElement;
+  }
+  if(typeOfNode == "Participants"){
+    var participantElement = createParticipants(childNode['@id'], childNode['name'])
+    var linkParticipantToActivity = makeLink(parentNode, participantElement)
+    participantElement.prop('name/first', "Participants")
+    arr.push(participantElement, linkParticipantToActivity)
+    graph.addCells(participantElement, linkParticipantToActivity)
+    return participantElement;
+  }
+  if(typeOfNode == "Roles"){
+    var roleElement = createRoles(childNode['@id'], childNode['name'])
+    var linkRoleToActivity = makeLink(parentNode, roleElement)
+    roleElement.prop('name/first', "Roles")
+    arr.push(roleElement, linkRoleToActivity)
+    graph.addCells(roleElement, linkRoleToActivity)
+    return roleElement;
+  }
+  if(typeOfNode == "Resources"){
+    var resourceElement = createResources(childNode['@id'], childNode['name'])
+    var linkResourceToActivity = makeLink(parentNode, resourceElement)
+    resourceElement.prop('name/first', "Resources")
+    arr.push(resourceElement, linkResourceToActivity)
+    graph.addCells(resourceElement, linkResourceToActivity)
+    return resourceElement;
   }
 }
 
