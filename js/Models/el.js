@@ -18,7 +18,6 @@ function createTextBlock(element, node, parentNode){
     div.style.lineBreak = 0.5
     div.style.visibility = "hidden"
     div.style.backgroundColor = "lightgrey"
-
     if(element.attributes.name['first'] == "Outcomes"){
         div.id = "Activities" + element.id
         div.textContent = "Activities that results in " + element.attr('label')['text']

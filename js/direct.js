@@ -6,6 +6,8 @@ var models = [];
 var duplicateFrame = [];
 var createdConsidearitonElementIds = new Set();   //This set stores all the multi linked consideration element in which the definition button is already embedded, to prevent dup ids
 var multiParentElementIds = {}
+var createdActivityTargets = new Set();
+var elementsAlreayinLayout = new Set();
 init();
 
 function buildTheGraph(){
@@ -202,115 +204,53 @@ function checkForActivities(outcome, arr, parentNode){
   for (const key in outcome){
     if(key.startsWith('sunyrdaf')){
       if(key == "sunyrdaf:resultsFrom"){
-        if(Array.isArray(outcome)){ //Conditions to create multiple activities
+        if(Array.isArray(outcome[key])){ //Conditions to create multiple activities
           outcome[key].forEach(activity =>{
-            console.log(activity)
             const activityElement = linkNodes(activity, arr, parentNode, "Activities")
             if(activity['sunyrdaf:extends']){
               var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, parentNode)
               subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
             }
             if(activity['sunyrdaf:generates']){
-              activity['sunyrdaf:generates'].forEach(node =>{
-                var outputElement = linkNodes(node, arr, activityElement, "Outputs")
-                createTextBlock(outputElement, node, activityElement)
-              })
+              checkForActivitiesTarget(activity, arr, activityElement)
             }
             if(activity['sunyrdaf:includes']){
-              activity['sunyrdaf:includes'].forEach(node =>{
-                if(node['@type'] == "sunyrdaf:Method" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Method"){
-                  var methodElement = linkNodes(node, arr, activityElement, "Methods")
-                  console.log(methodElement)
-                  createTextBlock(methodElement, node, activityElement)
-                }
-                if(node['@type'] == "sunyrdaf:Participant" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Participant"){
-                  var participantElement = linkNodes(node, arr, activityElement, "Participants")
-                  createTextBlock(participantElement, node, activityElement)
-                }
-                if(node['@type'] == "sunyrdaf:Role" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Role"){
-                  var roleElement = linkNodes(node, arr, activityElement, "Roles")
-                  createTextBlock(roleElement, node, activityElement)
-                }
-                if(node['@type'] == "sunyrdaf:Resource" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Resource"){
-                  var resourceElement = linkNodes(node, arr, activityElement, "Resources")
-                  createTextBlock(resourceElement, node, activityElement)
-                }
-              })
+              checkForActivitiesTarget(activity, arr, activityElement)
             }
           })
         }else{// Condition to create a single activity
           if(outcome[key]['name'] == undefined){
-            duplicateFrame.forEach(nodes =>{
-              if(nodes['@id'] == outcome[key]){
-                const activityElement = linkNodes(nodes, arr, parentNode, "Activities")
-                if(nodes['sunyrdaf:extends']){
-                  var subTopic = checkForSubTopics(nodes['sunyrdaf:extends'], arr, activityElement)
+            duplicateFrame.forEach(activity =>{
+              if(activity['@id'] == outcome[key]){
+                const activityElement = linkNodes(activity, arr, parentNode, "Activities")
+                if(activity['sunyrdaf:extends']){
+                  var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, activityElement)
                   subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
                 }
-                if(nodes['sunyrdaf:generates']){
-                  nodes['sunyrdaf:generates'].forEach(node =>{
-                    var outputElement = linkNodes(node, arr, activityElement, "Outputs")
-                    createTextBlock(outputElement, node, activityElement)
-                  })
+                if(activity['sunyrdaf:generates']){
+                  checkForActivitiesTarget(activity, arr, activityElement)
                 }
-                if(nodes['sunyrdaf:includes']){
-                  nodes['sunyrdaf:includes'].forEach(node =>{
-                    if(node['@type'] == "sunyrdaf:Method" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Method"){
-                      var methodElement = linkNodes(node, arr, activityElement, "Methods")
-                      console.log(methodElement)
-                      createTextBlock(methodElement, node, activityElement)
-                    }
-                    if(node['@type'] == "sunyrdaf:Participant" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Participant"){
-                      var participantElement = linkNodes(node, arr, activityElement, "Participants")
-                      createTextBlock(participantElement, node, activityElement)
-                    }
-                    if(node['@type'] == "sunyrdaf:Role" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Role"){
-                      var roleElement = linkNodes(node, arr, activityElement, "Roles")
-                      createTextBlock(roleElement, node, activityElement)
-                    }
-                    if(node['@type'] == "sunyrdaf:Resource" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Resource"){
-                      var resourceElement = linkNodes(node, arr, activityElement, "Resources")
-                      createTextBlock(resourceElement, node, activityElement)
-                    }
-                  })
+                if(activity['sunyrdaf:includes']){
+                  checkForActivitiesTarget(activity, arr, activityElement)
                 }
               }
             })
           }else{
-            const activityElement = linkNodes(outcome[key], arr, parentNode, "Activities")
-            if(outcome[key]['sunyrdaf:extends']){
-              var subTopic = checkForSubTopics(outcome[key]['sunyrdaf:extends'], arr, parentNode)
+            var activity = outcome[key]
+            const activityElement = linkNodes(activity, arr, parentNode, "Activities")
+            if(activity['sunyrdaf:extends']){
+              var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, parentNode)
               subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
             }
-            if(outcome[key]['sunyrdaf:generates']){
-              outcome[key]['sunyrdaf:generates'].forEach(node =>{
-                var outputElement = linkNodes(node, arr, activityElement, "Outputs")
-                createTextBlock(outputElement, node, activityElement)
-              })
+            if(activity['sunyrdaf:generates']){
+              checkForActivitiesTarget(activity, arr, activityElement)
             }
-            const c = outcome[key]
-            console.log(c['sunyrdaf:includes'])
-            if(c['sunyrdaf:includes']){
-              c['sunyrdaf:includes'].forEach(node =>{
-                if(node['@type'] == "sunyrdaf:Method" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Method"){
-                  var methodElement = linkNodes(node, arr, activityElement, "Methods")
-                  console.log(methodElement)
-                  createTextBlock(methodElement, node, activityElement)
-                }
-                if(node['@type'] == "sunyrdaf:Participant" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Participant"){
-                  var participantElement = linkNodes(node, arr, activityElement, "Participants")
-                  createTextBlock(participantElement, node, activityElement)
-                }
-                if(node['@type'] == "sunyrdaf:Role" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Role"){
-                  var roleElement = linkNodes(node, arr, activityElement, "Roles")
-                  createTextBlock(roleElement, node, activityElement)
-                }
-                if(node['@type'] == "sunyrdaf:Resource" || node['@type'] == "https://data.suny.edu/vocabs/oried/rdaf/suny/Resource"){
-                  var resourceElement = linkNodes(node, arr, activityElement, "Resources")
-                  createTextBlock(resourceElement, node, activityElement)
-                }
-              })
+            if(activity['sunyrdaf:includes']){
+              checkForActivitiesTarget(activity, arr, activityElement)
             }
+
+
+
           }
         }
       }else if(key == "sunyrdaf:includes"){
@@ -332,6 +272,8 @@ function checkForActivities(outcome, arr, parentNode){
     }
   }
 }
+
+
 
 
 
@@ -368,7 +310,6 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     var stage = createStage(childNode['@id'], childNode['name'])
     stage.prop('name/first', "Stages")
     arr.push(stage)
-    graph.addCells(stage)
     return stage;
   }
   if(typeOfNode == "Topics"){
@@ -376,7 +317,6 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     var linkStageToTopics = makeLink(parentNode, topicElement)
     topicElement.prop('name/first', "Topics")
     arr.push(topicElement, linkStageToTopics)
-    graph.addCells(topicElement, linkStageToTopics)
     return topicElement;
   }
   if(typeOfNode == "Outcomes"){
@@ -384,7 +324,6 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     var linkTopicToOutcome = makeLink(parentNode, outcomeElement)
     outcomeElement.prop('name/first', "Outcomes")
     arr.push(outcomeElement, linkTopicToOutcome)
-    graph.addCells(outcomeElement, linkOutcomeToActivity)
     return outcomeElement;
   }
   if(typeOfNode == "Activities"){
@@ -407,7 +346,6 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
         var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
         considerationElement.prop('name/first', "Considerations")
         arr.push(considerationElement, linkOutcomeToConsideration)
-        graph.addCells(considerationElement, linkOutcomeToActivity)
       }
     }else{
       considerationElement = createConsiderations(childNode['@id'], childNode['name'])
@@ -417,7 +355,6 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
       considerationElement.prop('name/first', "Considerations")
       arr.push(considerationElement, linkOutcomeToConsideration)
-
     }
     return considerationElement;
   }
@@ -437,58 +374,127 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
   }
 
   if(typeOfNode == "Outputs"){
-    var outputElement = createOutputs(childNode['@id'], childNode['name'])
-    var linkOutputToActivity = makeLink(parentNode, outputElement)
-    outputElement.prop('name/first', "Outputs")
-    arr.push(outputElement, linkOutputToActivity)
-    graph.addCells(outputElement, linkOutputToActivity)
+    var outputElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if(multiParentElementIds[childNode['@id']]){
+        outputElement = multiParentElementIds[childNode['@id']];
+        var linkOutputToActivity = makeLink(parentNode, outputElement)
+        outputElement.prop('name/first', "Outputs")
+        arr.push(linkOutputToActivity)
+      }
+    }else{
+      outputElement = createOutputs(childNode['@id'], childNode['name'])
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = outputElement
+      var linkOutputToActivity = makeLink(parentNode, outputElement)
+      outputElement.prop('name/first', "Outputs")
+      arr.push(outputElement, linkOutputToActivity)
+    }
     return outputElement;
   }
   if(typeOfNode == "Methods"){
-    var methodElement = createMethods(childNode['@id'], childNode['name'])
-    var linkMethodToActivity = makeLink(parentNode, methodElement)
-    methodElement.prop('name/first', "Methods")
-    arr.push(methodElement, linkMethodToActivity)
-    graph.addCells(methodElement, linkMethodToActivity)
+    let methodElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if(multiParentElementIds[childNode['@id']]){
+        methodElement = multiParentElementIds[childNode['@id']];
+        var linkMethodToActivity = makeLink(parentNode, methodElement)
+        methodElement.prop('name/first', "Methods")
+        arr.push(linkMethodToActivity)
+      }
+    }else{
+      methodElement = createMethods(childNode['@id'], childNode['name'])
+      var linkMethodToActivity = makeLink(parentNode, methodElement)
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = methodElement
+      methodElement.prop('name/first', "Methods")
+      arr.push(methodElement, linkMethodToActivity)
+    }
     return methodElement;
   }
   if(typeOfNode == "Participants"){
-    var participantElement = createParticipants(childNode['@id'], childNode['name'])
-    var linkParticipantToActivity = makeLink(parentNode, participantElement)
-    participantElement.prop('name/first', "Participants")
-    arr.push(participantElement, linkParticipantToActivity)
-    graph.addCells(participantElement, linkParticipantToActivity)
+    let participantElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if((multiParentElementIds[childNode['@id']])){
+        participantElement = multiParentElementIds[childNode['@id']];
+        var linkParticipantToActivity = makeLink(parentNode, participantElement)
+        participantElement.prop('name/first', "Participants")
+        arr.push(participantElement,linkParticipantToActivity)
+      }
+    }else{
+      participantElement = createParticipants(childNode['@id'], childNode['name'])
+      var linkParticipantToActivity = makeLink(parentNode, participantElement)
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = participantElement
+      participantElement.prop('name/first', "Participants")
+      arr.push(participantElement, linkParticipantToActivity)
+    }
     return participantElement;
   }
   if(typeOfNode == "Roles"){
-    var roleElement = createRoles(childNode['@id'], childNode['name'])
-    var linkRoleToActivity = makeLink(parentNode, roleElement)
-    roleElement.prop('name/first', "Roles")
-    arr.push(roleElement, linkRoleToActivity)
-    graph.addCells(roleElement, linkRoleToActivity)
+    let roleElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if((multiParentElementIds[childNode['@id']])){
+        roleElement =  multiParentElementIds[childNode['@id']];
+        var linkRoleToActivity = makeLink(parentNode, roleElement)
+        roleElement.prop('name/first', "Roles")
+        arr.push(linkRoleToActivity)
+      }
+    }else{
+      roleElement = createRoles(childNode['@id'], childNode['name'])
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = roleElement
+      var linkRoleToActivity = makeLink(parentNode, roleElement)
+      roleElement.prop('name/first', "Roles")
+      arr.push(roleElement, linkRoleToActivity)
+    }
     return roleElement;
   }
   if(typeOfNode == "Resources"){
-    var resourceElement = createResources(childNode['@id'], childNode['name'])
-    var linkResourceToActivity = makeLink(parentNode, resourceElement)
-    resourceElement.prop('name/first', "Resources")
-    arr.push(resourceElement, linkResourceToActivity)
-    graph.addCells(resourceElement, linkResourceToActivity)
+    let resourceElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if((multiParentElementIds[childNode['@id']])){
+        resourceElement =  multiParentElementIds[childNode['@id']];
+        var linkResourceToActivity = makeLink(parentNode, resourceElement)
+        resourceElement.prop('name/first', "Resources")
+        arr.push(linkResourceToActivity)
+      }
+    }else{
+      resourceElement = createResources(childNode['@id'], childNode['name'])
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = resourceElement
+      var linkResourceToActivity = makeLink(parentNode, resourceElement)
+      resourceElement.prop('name/first', "Resources")
+      resourceElement.prop('resource/Link', childNode['@id'])
+      arr.push(resourceElement, linkResourceToActivity)
+    }
     return resourceElement;
   }
 }
 
 
 
-function doLayout() {
+function doLayout(parentElement, el) {
   // Apply layout using DirectedGraph plugin
   var visibleElements = []
   //Checks for the visible elements on the graph when an event occurs and adds it to the layout
   models.forEach(el =>{
-    if(!el.get('hidden') ){
-      visibleElements.push(el)
+    if(!el.get('hidden')){
+      // if(elementsAlreayinLayout.has(el)){
+      //   console.log()
+      // }else{
+        visibleElements.push(el)
+      //}
     }
   })
+
+
+
+
   layout = joint.layout.DirectedGraph.layout(visibleElements, {
     setVertices: false,
     rankDir: 'LR',
@@ -497,9 +503,15 @@ function doLayout() {
     resizeClusters: false,
     setPosition: (element, position) => {
       // Align elements to the left by setting their x-coordinate
-      setElementsPosition(element, position)
+      setElementsPosition(element, position, parentElement)
+      // if(elementsAlreayinLayout.has(element)){
+      //   console.log()
+      // }else{
+      //   //elementsAlreayinLayout.add(element)
+      // }
     }
   });
+
   setRootToFix();       //Sets the position of the root elements
   setLinkVertices();    //Sets the vertices that is, marks the points where the links should route from
 }

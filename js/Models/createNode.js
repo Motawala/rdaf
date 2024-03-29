@@ -247,7 +247,7 @@ function createOutputs(id, name){
       },
       body: {
         strokeWidth: 2,
-        fill: "rgb(202, 176, 144)",
+        fill: "#9999e6",
         cursor: "grab"
       },
     },
@@ -288,7 +288,7 @@ function createParticipants(id, name){
       },
       body: {
         strokeWidth: 2,
-        fill: "rgb(202, 176, 144)",
+        fill: "#9999e6",
         cursor: "grab"
       },
     },
@@ -329,7 +329,7 @@ function createRoles(id, name){
       },
       body: {
         strokeWidth: 2,
-        fill: "rgb(202, 176, 144)",
+        fill: "#9999e6",
         cursor: "grab"
       },
     },
@@ -362,15 +362,15 @@ function createMethods(id, name){
         fontSize: 15,
         fontFamily: "sans-serif",
         fill: "black",
-        stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
         dx:0,
         text: name,
+        cursor: "grab"
       },
       body: {
         strokeWidth: 2,
-        fill: "rgb(202, 176, 144)",
+        fill: "#9999e6",
         cursor: "grab"
       },
     },
@@ -408,11 +408,14 @@ function createResources(id, name){
         type: 'TextBlock',
         dx:0,
         text: name,
+        cursor: "grab"
       },
       body: {
         strokeWidth: 2,
-        fill: "rgb(57, 187, 255)",
-        cursor: "grab"
+        fill: "#C8CDDA",
+        cursor: "grab",
+        'rx': 10, // Border radius
+        'ry': 10, // Border radius
       },
     },
     ports:{

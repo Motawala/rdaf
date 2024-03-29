@@ -44,11 +44,12 @@ function setLinkVertices(){
                     {x: sourceMidX, y: sourceMidY},
                     {x: targetX , y: targetMidY}
                 ])
+                const sourceNodeType = sourceCell.attributes.name['first']
                 // Different settings for the vertices from the Outcomes as multiple outcomes shares same activities
-                if(sourceCell.attributes.name['first'] == "Outcomes"){
+                if(sourceNodeType == "Outcomes" || sourceNodeType == "Resources" || sourceNodeType == "Participants"){
                     var sourceBBox = sourceCell.getBBox();
                     var targetBBox = targetCell.getBBox();
-                    var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width) + 100
+                    var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
                     var distance = 2200
                     if(sourceMidX != distance && sourceMidX > distance){
                         var difference = sourceMidX - distance
@@ -66,7 +67,7 @@ function setLinkVertices(){
                     var targetX = sourceMidX;
                     var targetMidY = parseInt(targetBBox.y) + parseInt(targetBBox.height)/2;
                     link.set('vertices', [
-                        {x: sourceMidX, y: sourceMidY },
+                        {x: sourceMidX, y: sourceMidY},
                         {x: targetX, y: targetMidY}
                     ])
                 }
@@ -79,36 +80,57 @@ function setLinkVertices(){
 /*
 Sets the position of a target element based on the position of the source element
 */
-function setElementsPosition(element, position){
-    if(element.attributes.name['first'] != "Activities" && element.attributes.name['first'] != "Considerations"){
-        const parentElement = graph.getPredecessors(element)[0]
-        if(parentElement){
+function setElementsPosition(element, position, parentElement){
+    if(element){
+        if(element.attributes.name['first'] != "Activities" && element.attributes.name['first'] != "Considerations"){
+            const parentElement = graph.getPredecessors(element)[0]
+            if(parentElement){
+                const parentPositionX = parentElement.position().x
+                const parentSize = parseInt(parentElement.size().width)
+                var distance = parentPositionX + parentSize
+                if(distance != 400 && distance < 400){
+                const difference = 400 - distance;
+                distance = distance + difference
+            }else{
+                distance = distance + 300
+            }
+            element.set('position', { x: distance , y: position.y});
+            }
+        }else{
+            const verticalSpacing = 100;
+            const parentElement = graph.getPredecessors(element)[0]
+            if(parentElement){
             const parentPositionX = parentElement.position().x
             const parentSize = parseInt(parentElement.size().width)
+            var distance = parentPositionX + parentSize + 200
+            if(distance != 600 && distance < 600){
+                const difference = 600 - distance;
+                distance = distance + difference
+            }else{
+                distance = distance + 500
+            }
+            element.set('position', { x: distance , y: position.y});
+            }
+        }
+
+        const nodeType = element.attributes.name['first']
+        if(nodeType == "Methods" || nodeType == "Participants" || nodeType == "Roles" || nodeType == "Resources"){
+            console.log("Here")
+            if(parentElement){
+            const parentPositionX = parseInt(parentElement.position().x)
+            const parentSize = parseInt(parentElement.size().width)
             var distance = parentPositionX + parentSize
+            distance = parseInt(distance)
+            //console.log(element.id, distance)
             if(distance != 400 && distance < 400){
-            const difference = 400 - distance;
-            distance = distance + difference
-        }else{
-            distance = distance + 300
-        }
-        element.set('position', { x: distance , y: position.y});
-        }
-    }else{
-        const verticalSpacing = 100;
-        const parentElement = graph.getPredecessors(element)[0]
-        var h = (element.getBBox().height + verticalSpacing)/2
-        if(parentElement){
-        const parentPositionX = parentElement.position().x
-        const parentSize = parseInt(parentElement.size().width)
-        var distance = parentPositionX + parentSize + 200
-        if(distance != 600 && distance < 600){
-            const difference = 600 - distance;
-            distance = distance + difference
-        }else{
-            distance = distance + 500
-        }
-        element.set('position', { x: distance , y: position.y});
+                const difference = 400 - distance;
+                distance = distance + difference
+            }else{
+                distance = distance + 300
+            }
+
+            element.set('position', { x: distance , y: position.y/2});
+            }
         }
     }
 
