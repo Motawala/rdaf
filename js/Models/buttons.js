@@ -154,7 +154,7 @@ function createConsiderationButton(port,pos) {
               'id': port.id,
               'width': 115,
               'height': 20,
-              'fill': '#ffbf80', // Button background color
+              'fill': '#005C90', // Button background color
               'stroke': 'black', // Button border color
               'stroke-width': 2, // Button border width
               'cursor': 'pointer'
@@ -165,7 +165,7 @@ function createConsiderationButton(port,pos) {
             selector: 'text',
             textContent: port.id, // Text displayed on the button
             attributes: {
-              'fill': 'black', // Text color
+              'fill': 'white', // Text color
               'font-size': '15px',
               'font-family': 'Arial',
               'font-weight':'bold',
@@ -245,8 +245,7 @@ function createButton(port,pos) {
                   'id': port.id,
                   'width': 115,
                   'height': 20,
-
-                  'fill': '#ffffb3', // Button background color
+                  'fill': '#005C90', // Button background color
                   'stroke': 'black', // Button border color
                   'stroke-width': 2, // Button border width
                   'cursor': 'pointer'
@@ -258,7 +257,7 @@ function createButton(port,pos) {
               textContent: port.id, // Text displayed on the button
               attributes: {
                 'fontweight':'bold',
-                  'fill': 'black', // Text color
+                  'fill': 'white', // Text color
                   'font-size': '15px',
                   'font-family': 'Arial',
                   'text-anchor': 'middle',
@@ -330,8 +329,7 @@ function createMethodButton(port,pos) {
                 'id': port.id,
                 'width': 115,
                 'height': 20,
-
-                'fill': '#ffffb3', // Button background color
+                'fill': '#005C90', // Button background color
                 'stroke': 'black', // Button border color
                 'stroke-width': 2, // Button border width
                 'cursor': 'pointer'
@@ -343,7 +341,7 @@ function createMethodButton(port,pos) {
             textContent: port.id, // Text displayed on the button
             attributes: {
               'fontweight':'bold',
-                'fill': 'black', // Text color
+                'fill': 'white', // Text color
                 'font-size': '15px',
                 'font-family': 'Arial',
                 'text-anchor': 'middle',
@@ -353,7 +351,7 @@ function createMethodButton(port,pos) {
             }
         }
     ],
-    x: "75%", // Button position X
+    x: "85%", // Button position X
     y: "0%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
@@ -372,8 +370,7 @@ function createRolesButton(port,pos) {
                 'id': port.id,
                 'width': 115,
                 'height': 20,
-
-                'fill': '#ffffb3', // Button background color
+                'fill': '#005C90', // Button background color
                 'stroke': 'black', // Button border color
                 'stroke-width': 2, // Button border width
                 'cursor': 'pointer'
@@ -385,17 +382,17 @@ function createRolesButton(port,pos) {
             textContent: port.id, // Text displayed on the button
             attributes: {
               'fontweight':'bold',
-                'fill': 'black', // Text color
-                'font-size': '15px',
-                'font-family': 'Arial',
-                'text-anchor': 'middle',
-                'x': 55,
-                'y': 15, // Adjust text position
-                'cursor': 'pointer'
+              'fill': 'white', // Text color
+              'font-size': '15px',
+              'font-family': 'Arial',
+              'text-anchor': 'middle',
+              'x': 55,
+              'y': 15, // Adjust text position
+              'cursor': 'pointer'
             }
         }
     ],
-    x: "75%", // Button position X
+    x: "85%", // Button position X
     y: "20%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
@@ -414,8 +411,7 @@ function createParticipantsButton(port,pos) {
                 'id': port.id,
                 'width': 115,
                 'height': 20,
-
-                'fill': '#ffffb3', // Button background color
+                'fill': '#005C90', // Button background color
                 'stroke': 'black', // Button border color
                 'stroke-width': 2, // Button border width
                 'cursor': 'pointer'
@@ -427,17 +423,17 @@ function createParticipantsButton(port,pos) {
             textContent: port.id, // Text displayed on the button
             attributes: {
               'fontweight':'bold',
-                'fill': 'black', // Text color
-                'font-size': '15px',
-                'font-family': 'Arial',
-                'text-anchor': 'middle',
-                'x': 55,
-                'y': 15, // Adjust text position
-                'cursor': 'pointer'
+              'fill': 'white', // Text color
+              'font-size': '15px',
+              'font-family': 'Arial',
+              'text-anchor': 'middle',
+              'x': 55,
+              'y': 15, // Adjust text position
+              'cursor': 'pointer'
             }
         }
     ],
-    x: "75%", // Button position X
+    x: "85%", // Button position X
     y: "40%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
@@ -456,8 +452,7 @@ function createOutputButton(port,pos) {
                 'id': port.id,
                 'width': 115,
                 'height': 20,
-
-                'fill': '#ffffb3', // Button background color
+                'fill': '#005C90', // Button background color
                 'stroke': 'black', // Button border color
                 'stroke-width': 2, // Button border width
                 'cursor': 'pointer'
@@ -469,17 +464,17 @@ function createOutputButton(port,pos) {
             textContent: port.id, // Text displayed on the button
             attributes: {
               'fontweight':'bold',
-                'fill': 'black', // Text color
-                'font-size': '15px',
-                'font-family': 'Arial',
-                'text-anchor': 'middle',
-                'x': 55,
-                'y': 15, // Adjust text position
-                'cursor': 'pointer'
+              'fill': 'white', // Text color
+              'font-size': '15px',
+              'font-family': 'Arial',
+              'text-anchor': 'middle',
+              'x': 55,
+              'y': 15, // Adjust text position
+              'cursor': 'pointer'
             }
         }
     ],
-    x: "75%", // Button position X
+    x: "85%", // Button position X
     y: "80%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
@@ -499,8 +494,7 @@ function createResourcesButton(port,pos) {
                 'id': port.id,
                 'width': 115,
                 'height': 20,
-
-                'fill': '#ffffb3', // Button background color
+                'fill': '#005C90', // Button background color
                 'stroke': 'black', // Button border color
                 'stroke-width': 2, // Button border width
                 'cursor': 'pointer'
@@ -512,17 +506,17 @@ function createResourcesButton(port,pos) {
             textContent: port.id, // Text displayed on the button
             attributes: {
               'fontweight':'bold',
-                'fill': 'black', // Text color
-                'font-size': '15px',
-                'font-family': 'Arial',
-                'text-anchor': 'middle',
-                'x': 55,
-                'y': 15, // Adjust text position
-                'cursor': 'pointer'
+              'fill': 'white', // Text color
+              'font-size': '15px',
+              'font-family': 'Arial',
+              'text-anchor': 'middle',
+              'x': 55,
+              'y': 15, // Adjust text position
+              'cursor': 'pointer'
             }
         }
     ],
-    x: "75%", // Button position X
+    x: "85%", // Button position X
     y: "60%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)

@@ -73,7 +73,7 @@ function buildTheGraph(){
             // Add custom tool buttons for each port
             topicElement.addPort(port3);        // Adds a port to the element
             const considerationButton = createConsiderationButton(port3)
-            considerationButton.options.x = "85%"
+            considerationButton.options.x = "80%"
             tools.push(considerationButton)       //Create the button
             graph.addCells(topicElement);
             toolsView = new joint.dia.ToolsView({ tools: [tools]});
@@ -84,7 +84,7 @@ function buildTheGraph(){
           // Add custom tool buttons for each port
           topicElement.addPort(port2);
           const outcomeButton = createButton(port2)
-          outcomeButton.options.x = "85%"
+          outcomeButton.options.x = "80%"
           tools.push(outcomeButton)//Creates the Outcome button
           graph.addCells(topicElement);
           toolsView = new joint.dia.ToolsView({ tools: tools});
@@ -248,9 +248,6 @@ function checkForActivities(outcome, arr, parentNode){
             if(activity['sunyrdaf:includes']){
               checkForActivitiesTarget(activity, arr, activityElement)
             }
-
-
-
           }
         }
       }else if(key == "sunyrdaf:includes"){
@@ -266,16 +263,11 @@ function checkForActivities(outcome, arr, parentNode){
         if(subTopic != undefined){
           //This creates the si
           subTopicTextBlock(subTopic, parentNode)
-
         }
       }
     }
   }
 }
-
-
-
-
 
 //This function creates the subtopic
 /*
@@ -478,20 +470,16 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
 
 
 
-function doLayout(parentElement, el) {
+function doLayout() {
   // Apply layout using DirectedGraph plugin
   var visibleElements = []
   //Checks for the visible elements on the graph when an event occurs and adds it to the layout
   models.forEach(el =>{
     if(!el.get('hidden')){
-      // if(elementsAlreayinLayout.has(el)){
-      //   console.log()
-      // }else{
-        visibleElements.push(el)
-      //}
+      visibleElements.push(el)
+
     }
   })
-
 
 
 
@@ -503,20 +491,15 @@ function doLayout(parentElement, el) {
     resizeClusters: false,
     setPosition: (element, position) => {
       // Align elements to the left by setting their x-coordinate
-      setElementsPosition(element, position, parentElement)
-      // if(elementsAlreayinLayout.has(element)){
-      //   console.log()
-      // }else{
-      //   //elementsAlreayinLayout.add(element)
-      // }
+      setElementsPosition(element, position)
     }
   });
-
+  changePaperSize();
   setRootToFix();       //Sets the position of the root elements
   setLinkVertices();    //Sets the vertices that is, marks the points where the links should route from
 }
 
-buildTheGraph();
+
 
 function init(){
 // Create a new directed graph
@@ -528,9 +511,8 @@ paper = new dia.Paper({
   el: document.getElementById('graph-container'),
   model: graph,
   interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
-  width: 10000, //window.innerWidth,
-  height: 50000,//window.innerHeight,
-  overflow: true,
+  width: 2850, //window.innerWidth,
+  height: 1350,//window.innerHeight,
   gridSize: 10,
   perpendicularLinks: true,
   drawGrid: true,
@@ -551,12 +533,10 @@ paper = new dia.Paper({
     return !view.model.get('hidden');
   }
 });
-
-// Fit the paper content to the container size
-paper.transformToFitContent()
-
+  var paperElement = document.getElementById('graph-container');
+  paperElement.style.border = "5px solid #000000";
+  buildTheGraph();
 }
-
 
 
 

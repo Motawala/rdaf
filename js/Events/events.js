@@ -234,7 +234,7 @@ function radioButtonEvents(elementView, port){
             }
             activityButton.style.visibility = "visible"
             considerationButton.style.visibility = "visible"
-            circleElement.setAttribute('fill', 'Orange')
+            circleElement.setAttribute('fill', '#D86C00')
         }
         if(circleElement.id.startsWith('N')){
             //When clicked on Not Started Button, show the activity button
@@ -251,7 +251,7 @@ function radioButtonEvents(elementView, port){
             }
             activityButton.style.visibility = "visible"
             considerationButton.style.visibility = "visible"
-            circleElement.setAttribute('fill', 'Red')
+            circleElement.setAttribute('fill', '#AB0606')
         }
     }else{
         //unhighlights the rest of the elements that the user is not interacting with
@@ -301,7 +301,7 @@ function defaultEvent(node, typeOfPort){
                     console.error("Link Array is not defined")
                 }
             })
-            doLayout(parentElement, visibleElement)
+            doLayout()
         }
     }else{
         const OutboundLinks = graph.getConnectedLinks(node, {outbound:true})
@@ -321,7 +321,6 @@ function defaultEvent(node, typeOfPort){
                             links.getTargetElement().set('hidden', false)
                             links.getTargetElement().set('collapsed', true)
                             links.set('hidden', false)
-                            doLayout()
                         }
                     })
                 }
@@ -351,50 +350,10 @@ function defaultEvent(node, typeOfPort){
                 }
             }
         })
+        //doLayout()
     }
 }
 
-
-function closeTheRest1(element){
-    //This condition closes all the nodes when the user intereacts with the parentNode
-    const subElementsLinks = graph.getConnectedLinks(element, {outbound:true})
-    if(subElementsLinks != undefined){
-        subElementsLinks.forEach(subLinks =>{
-            if(subLinks != undefined){
-                subLinks.set('hidden', true)
-                subLinks.set('collapsed', false)
-            }else{
-                console.error("Element already closed", subLinks)
-            }
-        });
-    }else{
-        console.error("Sub Elements Links not defined")
-    }
-
-    const successrorCells = graph.getSubgraph([
-        ...graph.getSuccessors(element),
-    ])
-
-    if(successrorCells != undefined){
-        successrorCells.forEach(function(successor) {
-            if(successor != undefined){
-                successor.set('hidden', true);
-                successor.set('collapsed', false);
-                const openLinks = graph.getConnectedLinks(successor, {outbound: true})
-                openLinks.forEach(links =>{
-                    if(links != undefined){
-                        links.set('hidden', true)
-                        links.set('collapsed', false)
-                    }
-                })
-            }else{
-                console.error("Element already closed", successor)
-            }
-        });
-    }else{
-        console.error("successor Cells not defined")
-    }
-}
 
 
 function removeUnwantedButton(elementView, outboundLinks, activityButton, considerationButton){
@@ -427,3 +386,5 @@ function setTimeOut(){
         console.log();
       }, 100000000); // Change 1000 to the desired timeout in milliseconds
 }
+
+

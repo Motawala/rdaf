@@ -46,7 +46,7 @@ function setLinkVertices(){
                 ])
                 const sourceNodeType = sourceCell.attributes.name['first']
                 // Different settings for the vertices from the Outcomes as multiple outcomes shares same activities
-                if(sourceNodeType == "Outcomes" || sourceNodeType == "Resources" || sourceNodeType == "Participants"){
+                if(sourceNodeType == "Outcomes" || sourceNodeType == "Resources" || sourceNodeType == "Participants" || sourceNodeType == "Outputs"){
                     var sourceBBox = sourceCell.getBBox();
                     var targetBBox = targetCell.getBBox();
                     var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
@@ -80,8 +80,9 @@ function setLinkVertices(){
 /*
 Sets the position of a target element based on the position of the source element
 */
-function setElementsPosition(element, position, parentElement){
+function setElementsPosition(element, position){
     if(element){
+        var label = (element.attr('label'))
         if(element.attributes.name['first'] != "Activities" && element.attributes.name['first'] != "Considerations"){
             const parentElement = graph.getPredecessors(element)[0]
             if(parentElement){
@@ -94,41 +95,54 @@ function setElementsPosition(element, position, parentElement){
             }else{
                 distance = distance + 300
             }
+            label.refX = "5%"
             element.set('position', { x: distance , y: position.y});
             }
         }else{
-            const verticalSpacing = 100;
             const parentElement = graph.getPredecessors(element)[0]
             if(parentElement){
             const parentPositionX = parentElement.position().x
             const parentSize = parseInt(parentElement.size().width)
-            var distance = parentPositionX + parentSize + 200
+            var distance = parentPositionX + parentSize + 250
             if(distance != 600 && distance < 600){
                 const difference = 600 - distance;
                 distance = distance + difference
             }else{
                 distance = distance + 500
             }
+            label.refX = "5%"
             element.set('position', { x: distance , y: position.y});
             }
         }
 
         const nodeType = element.attributes.name['first']
-        if(nodeType == "Methods" || nodeType == "Participants" || nodeType == "Roles" || nodeType == "Resources"){
-            console.log("Here")
+        if(nodeType == "Methods" || nodeType == "Participants" || nodeType == "Roles" || nodeType == "Resources" || nodeType == "Outputs"){
+            var sourceLink = (graph.getConnectedLinks(element, {inbound:true}))
+            let sourceElement
+            sourceLink.forEach(link =>{
+                if(!link.get('hidden')){
+                    sourceElement = link.get('source').id
+                    return;
+                }
+                console.log()
+            })
+            var sourceCell = graph.getCell(sourceElement)
+            var parentElement = sourceCell
+            console.log(parentElement)
             if(parentElement){
-            const parentPositionX = parseInt(parentElement.position().x)
-            const parentSize = parseInt(parentElement.size().width)
-            var distance = parentPositionX + parentSize
-            distance = parseInt(distance)
-            //console.log(element.id, distance)
+                const parentPositionX = parseInt(parentElement.position().x)
+                const parentSize = parseInt(parentElement.size().width)
+                var distance = parentPositionX + parentSize
+                distance = parseInt(distance)
             if(distance != 400 && distance < 400){
+                console.log("Here")
                 const difference = 400 - distance;
                 distance = distance + difference
             }else{
+                console.log("Here")
                 distance = distance + 300
             }
-
+            label.refX = "5%"
             element.set('position', { x: distance , y: position.y/2});
             }
         }
@@ -136,11 +150,24 @@ function setElementsPosition(element, position, parentElement){
 
 }
 
+function changePaperSize(){
+    var sizeOfContentBox = paper.getContentBBox({useModelGeometry:true});           //Returns the Bounding box of the content that is visible on the page.
+    var paperWidth = paper.options.width;   //Paper's initial width
+    var paperHeight = paper.options.height; //Papers initial height
+    if ((sizeOfContentBox.width + 100) > paperWidth) {      //Change the width if any elements overflows on x
+        paperWidth = sizeOfContentBox.width + 100; // Increase width by 100 units
+    }
+    if ((sizeOfContentBox.height + 100) > paperHeight) {   //Change the height if any element overflows on y
+        paperHeight = sizeOfContentBox.height; // Increase height by 100 units
+    }
+    paper.setDimensions(paperWidth, paperHeight);
+}
+
 
 
 //This function sets the root elements to a fix position
 function setRootToFix(){
-    const rootCenter = { x: 200, y: (window.innerHeight)/2 };
+    const rootCenter = { x: 200, y: (paper.options.height)/2 };
     // Calculate the total height of all root elements
     let totalHeight = 0;
     root.forEach(element => {

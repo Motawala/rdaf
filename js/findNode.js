@@ -83,9 +83,9 @@ if(Array.isArray(activity['sunyrdaf:includes'])){
 }
 }
 
-function findNode(nodeUndefined){
+function findNode(undefinedNode){
 for (const nodes of duplicateFrame) {
-    if(nodes['@id'] == nodeUndefined){
+    if(nodes['@id'] == undefinedNode){
     return nodes
     }
 }

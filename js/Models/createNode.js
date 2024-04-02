@@ -15,7 +15,13 @@ function makeLink(from,to) {
           }
         },
       },
-      target: { id: to.id}
+      target: { id: to.id},
+      attrs: {
+        line: {
+            stroke: '#640067', // Change the color of the link to blue
+            strokeWidth: 2, // Adjust the width of the link if needed
+        },
+    },
 
 });
 
@@ -41,7 +47,7 @@ function createStage(id, name){
   const node = new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: '150',
+      width: 150,
       height: 30
     },
     attrs: {
@@ -49,14 +55,16 @@ function createStage(id, name){
         fontWeight: "bold",
         fontSize: 15,
         fontFamily: "sans-serif",
-        fill: "#ffffff",
+        fill: "black",
         paintOrder: "stroke",
         text: name,
-        cursor: "pointer"
+        "text-anchor":"start",
+        cursor: "pointer",
+        x:-70
       },
       body: {
         strokeWidth: 2,
-        fill: "grey",
+        fill: "#E2E3E5",
         cursor: "pointer"
       },
       },
@@ -87,10 +95,12 @@ function createTopics(id, name){
         fill: "black",
         paintOrder: "stroke",
         text: name,
+        "text-anchor":"start",
+        cursor: "pointer",
       },
       body: {
         strokeWidth: 2,
-        fill: "	#7B9EF6",
+        fill: "	#E2E3E5",
         cursor: "grab"
       },
     },
@@ -127,12 +137,12 @@ function createConsiderations(id, name){
         stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
-        dx:0,
         text: name,
+        "text-anchor":"start",
       },
       body: {
         strokeWidth: 2,
-        fill: "white",
+        fill: "#E2E3E5",
         cursor: "grab"
       },
     },
@@ -150,7 +160,7 @@ function createConsiderations(id, name){
 
 
 function createOutcomes(id, name){
-  const textWidth = name.length * 8; // Approximate width based on font size and average character width
+  const textWidth = name.length * 9.2; // Approximate width based on font size and average character width
   const width = Math.max(textWidth, 100); // Ensure a minimum width to accommodate shorter text
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
@@ -160,16 +170,18 @@ function createOutcomes(id, name){
     },
     attrs: {
       label: {
-        fontSize: 17,
+        fontWeight: 'bold',
+        fontSize: 18,
         fontFamily: "sans-serif",
         fill: "black",
         paintOrder: "stroke",
         text: name,
+        "text-anchor":"start",
       },
       body: {
         type:'TextBlock',
         strokeWidth: 2,
-        fill: "	#ffcccc",
+        fill: "#57ABDA",
         cursor: "grab"
       },
     },
@@ -191,22 +203,23 @@ function createActivities(id, name){
   const node =  new joint.shapes.standard.Rectangle({
       id: id,
       size: {
-        width: width + 170,
+        width: width + 100,
         height: 120
       },
       attrs: {
         label: {
-          //fontWeight: "bold",
-        fontSize: 15,
+        fontWeight: "bold",
+        fontSize: 17,
         fontFamily: "sans-serif",
         fill: "black",
         stroke: "#333333",
         paintOrder: "stroke",
         text: name,
+        "text-anchor":"start",
       },
       body: {
-        strokeWidth: 2,
-        fill: "#9999e6",
+        strokeWidth: 3,
+        fill: "#57ABDA",
         cursor: "grab"
       },
     },
@@ -222,15 +235,15 @@ function createActivities(id, name){
 
 function createOutputs(id, name){
   if(typeof name == 'string'){
-    var textWidth = name.length * 10
+    var textWidth = name.length * 8
   }else{
     var textWidth = 200
   }
-  const width = Math.max(textWidth, 200); // Ensure a minimum width to accommodate shorter text
+  const width = Math.max(textWidth, 100); // Ensure a minimum width to accommodate shorter text
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width + 100,
+      width: width,
       height: 35
     },
     attrs: {
@@ -242,12 +255,12 @@ function createOutputs(id, name){
         stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
-        dx:0,
         text: name,
+        "text-anchor":"start",
       },
       body: {
         strokeWidth: 2,
-        fill: "#9999e6",
+        fill: "#57ABDA",
         cursor: "grab"
       },
     },
@@ -263,7 +276,7 @@ function createOutputs(id, name){
 
 function createParticipants(id, name){
   if(typeof name == 'string'){
-    var textWidth = name.length * 10
+    var textWidth = name.length * 9
   }else{
     var textWidth = 200
   }
@@ -271,7 +284,7 @@ function createParticipants(id, name){
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width + 100,
+      width: width,
       height: 35
     },
     attrs: {
@@ -283,12 +296,12 @@ function createParticipants(id, name){
         stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
-        dx:0,
         text: name,
+        "text-anchor":"start",
       },
       body: {
         strokeWidth: 2,
-        fill: "#9999e6",
+        fill: "#57ABDA",
         cursor: "grab"
       },
     },
@@ -304,7 +317,7 @@ function createParticipants(id, name){
 
 function createRoles(id, name){
   if(typeof name == 'string'){
-    var textWidth = name.length * 10
+    var textWidth = name.length * 9
   }else{
     var textWidth = 200
   }
@@ -312,7 +325,7 @@ function createRoles(id, name){
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width + 100,
+      width: width,
       height: 35
     },
     attrs: {
@@ -324,12 +337,12 @@ function createRoles(id, name){
         stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
-        dx:0,
         text: name,
+        "text-anchor":"start",
       },
       body: {
         strokeWidth: 2,
-        fill: "#9999e6",
+        fill: "#57ABDA",
         cursor: "grab"
       },
     },
@@ -345,7 +358,7 @@ function createRoles(id, name){
 
 function createMethods(id, name){
   if(typeof name == 'string'){
-    var textWidth = name.length * 10
+    var textWidth = name.length * 9
   }else{
     var textWidth = 200
   }
@@ -353,7 +366,7 @@ function createMethods(id, name){
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width + 100,
+      width: width,
       height: 35
     },
     attrs: {
@@ -362,15 +375,15 @@ function createMethods(id, name){
         fontSize: 15,
         fontFamily: "sans-serif",
         fill: "black",
+        stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
-        dx:0,
         text: name,
-        cursor: "grab"
+        "text-anchor":"start",
       },
       body: {
         strokeWidth: 2,
-        fill: "#9999e6",
+        fill: "#57ABDA",
         cursor: "grab"
       },
     },
@@ -386,7 +399,7 @@ function createMethods(id, name){
 
 function createResources(id, name){
   if(typeof name == 'string'){
-    var textWidth = name.length * 10
+    var textWidth = name.length * 9
   }else{
     var textWidth = 200
   }
@@ -394,7 +407,7 @@ function createResources(id, name){
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width + 100,
+      width: width,
       height: 35
     },
     attrs: {
@@ -406,9 +419,9 @@ function createResources(id, name){
         stroke: "#333333",
         paintOrder: "stroke",
         type: 'TextBlock',
-        dx:0,
         text: name,
-        cursor: "grab"
+        cursor: "grab",
+        "text-anchor":"start",
       },
       body: {
         strokeWidth: 2,

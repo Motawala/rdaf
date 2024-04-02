@@ -34,28 +34,28 @@ paper.on('cell:mouseover', function(cellView) {
                             }
                         }
                         else if(element.childNodes.button.id == "Activities"){
-                                element.childNodes.button.setAttribute('fill', 'lightgrey')
+                                element.childNodes.button.setAttribute('fill', '#004265')
                                 var textBlock = document.getElementById("Activities" + cellView.model.id)
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
                                 textBlock.style.visibility = "visible"
                         }
                         else if(element.childNodes.button.id == "Considerations"){
-                                element.childNodes.button.setAttribute('fill', 'lightgrey')
+                                element.childNodes.button.setAttribute('fill', '#004265')
                                 var textBlock = document.getElementById(cellView.model.id)
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 60) + 'px';
                                 //textBlock.style.visibility = "visible"
                         }
                         else if(element.childNodes.button.id == "Outcomes"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            element.childNodes.button.setAttribute('fill', '#004265')
                             var textBlock = document.getElementById(cellView.model.id)
                             textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                             textBlock.style.top = ((paperRect1.y) + 40) + 'px';
                             textBlock.style.visibility = "visible"
                         }
                         else if(element.childNodes.button.id == "Outputs"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            element.childNodes.button.setAttribute('fill', '#004265')
                             var textBlock = document.getElementById("Outputs" + cellView.model.id)
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
@@ -67,7 +67,7 @@ paper.on('cell:mouseover', function(cellView) {
 
                         }
                         else if(element.childNodes.button.id == "Participants"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            element.childNodes.button.setAttribute('fill', '#004265')
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -78,7 +78,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
 
                         else if(element.childNodes.button.id == "Methods"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            element.childNodes.button.setAttribute('fill', '#004265')
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -88,7 +88,7 @@ paper.on('cell:mouseover', function(cellView) {
                             }
                         }
                         else if(element.childNodes.button.id == "Roles"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            element.childNodes.button.setAttribute('fill', '#004265')
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -98,7 +98,7 @@ paper.on('cell:mouseover', function(cellView) {
                             }
                         }
                         else if(element.childNodes.button.id == "Resources"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
+                            element.childNodes.button.setAttribute('fill', '#004265')
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -148,15 +148,15 @@ paper.on('cell:mouseover', function(cellView) {
                         textBlock.style.visibility = "hidden"
                     }
                     else if(element.childNodes.button.id == "Activities"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById("Activities" + cellView.model.id)
                         textBlock.style.visibility = "hidden"
                     }
                     else if(element.childNodes.button.id == "Considerations"){
-                        element.childNodes.button.setAttribute('fill', '#ffbf80')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                     }
                     else if(element.childNodes.button.id == "Outcomes"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById(cellView.model.id)
                         if(textBlock){
                             textBlock.style.visibility = "hidden"
@@ -165,7 +165,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                     }
                     else if(element.childNodes.button.id == "Outputs"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById("Outputs" + cellView.model.id)
                         if(textBlock){
                             textBlock.style.visibility = "hidden"
@@ -174,7 +174,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                     }
                     else if(element.childNodes.button.id == "Participants"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById("Participants" + cellView.model.id)
                         if(textBlock){
                             textBlock.style.visibility = "hidden"
@@ -183,7 +183,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                     }
                     else if(element.childNodes.button.id == "Roles"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById("Roles" + cellView.model.id)
                         if(textBlock){
                             textBlock.style.visibility = "hidden"
@@ -192,7 +192,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                     }
                     else if(element.childNodes.button.id == "Resources"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById("Resources" + cellView.model.id)
                         if(textBlock){
                             textBlock.style.visibility = "hidden"
@@ -201,7 +201,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                     }
                     else if(element.childNodes.button.id == "Methods"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
+                        element.childNodes.button.setAttribute('fill', '#005C90')
                         var textBlock = document.getElementById("Methods" + cellView.model.id)
                         if(textBlock){
                             textBlock.style.visibility = "hidden"
