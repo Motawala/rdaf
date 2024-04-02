@@ -6,7 +6,10 @@ var paper;
 var root = [];
 var models = [];
 var duplicateFrame = [];
+var createdConsidearitonElementIds = new Set();   //This set stores all the multi linked consideration element in which the definition button is already embedded, to prevent dup ids
 var multiParentElementIds = {};
+var createdActivityTargets = new Set();
+var elementsAlreayinLayout = new Set();
 
 // initialize 
 init(); 
@@ -45,58 +48,63 @@ function buildTheGraph(){
               "@type": "@id"
             },
         },
-    })).then(frame => {
-      // example of pulling a single Outcome and linked Activity from the input data file
-      // in reality we want to navigate the entire graph
-      const frameArray = frame['@graph']
-      duplicateFrame = frameArray
-      frameArray.forEach(node =>{
-        if(node['additionalType'] == "RdAF Stage"){
-          var stage = linkNodes(node, Elements, "", "Stages")
-          stage.position(100,100)
-          root.push(stage)
-          topic = node['sunyrdaf:includes']
-          if(Array.isArray(topic)){
-            topic.forEach(topicObj =>{
-              var tools = [];
-              if(topicObj){
-                //Creates the topic
-                var topicElement = linkNodes(topicObj, Elements, stage, "Topics")
-                const w = topicElement.size().width
-                const h = topicElement.size().height
-                topicElement.size(w + 200, h)
-                //Elements.push(topicElement)
-                if(topicObj["sunyrdaf:includes"]){
-                  //Creates the consideration button if a topic includes consideration
-                  var port3 = createPort('Considerations', 'out');
-                  // Add custom tool buttons for each port
-                  topicElement.addPort(port3);// Adds a port to the element
-                  const considerationButton = createConsiderationButton(port3)
-                  considerationButton.options.x = "85%"
-                  tools.push(considerationButton)//Create the button
-                }
-                var port2 = createPort('Outcomes', 'out');
-                // Add custom tool buttons for each port
-                topicElement.addPort(port2);
-                const outcomeButton = createButton(port2)
-                outcomeButton.options.x = "85%"
-                tools.push(outcomeButton)//Creates the Outcome button
-                let toolsView = new joint.dia.ToolsView({ tools: tools}); 
-                topicElement.findView(paper).addTools(toolsView);
-                checkOutcomes(topicObj, Elements, topicElement)
-                createTextBlock(topicElement,topicObj, stage )
-              }
-            })
+  }))
+  .then(frame => {
+
+// example of pulling a single Outcome and linked Activity from the input data file
+// in reality we want to navigate the entire graph
+  const frameArray = frame['@graph']
+  duplicateFrame = frameArray
+  frameArray.forEach(node =>{
+    if(node['additionalType'] == "RdAF Stage"){
+      var stage = linkNodes(node, Elements, "", "Stages")
+      graph.addCells(stage)
+      root.push(stage)
+      topic = node['sunyrdaf:includes']
+      if(Array.isArray(topic)){
+        topic.forEach(topicObj =>{
+        var tools = [];
+        if(topicObj){
+          //Creates the topic
+          var topicElement = linkNodes(topicObj, Elements, stage, "Topics")
+          const width = topicElement.size().width
+          const height = topicElement.size().height
+          topicElement.size(width + 200, height)
+          Elements.push(topicElement)
+          if(topicObj["sunyrdaf:includes"]){
+            //Creates the consideration button if a topic includes consideration
+            var port3 = createPort('Considerations', 'out');
+            // Add custom tool buttons for each port
+            topicElement.addPort(port3);        // Adds a port to the element
+            const considerationButton = createConsiderationButton(port3)
+            considerationButton.options.x = "85%"
+            tools.push(considerationButton)       //Create the button
+            graph.addCells(topicElement);
+            toolsView = new joint.dia.ToolsView({ tools: [tools]});
+            topicElement.findView(paper).addTools(toolsView);//Embed the tools view into the element view
+            createTextBlock(topicElement,topicObj["sunyrdaf:includes"], stage )
           }
+          var port2 = createPort('Outcomes', 'out');
+          // Add custom tool buttons for each port
+          topicElement.addPort(port2);
+          const outcomeButton = createButton(port2)
+          outcomeButton.options.x = "85%"
+          tools.push(outcomeButton)//Creates the Outcome button
+          graph.addCells(topicElement);
+          toolsView = new joint.dia.ToolsView({ tools: tools});
+          topicElement.findView(paper).addTools(toolsView);
+          checkOutcomes(topicObj, Elements, topicElement)
+          createTextBlock(topicElement,topicObj, stage )
         }
-    });
-    paper.setInteractivity(false);
-    // the models list will be in the order the elements were added to the graph
-    // it seems like there ought to be a way to get this from the JointJS library
-    // itself - possibly the graph.dfs method??
-    models = Elements;
-    // Perform layout after setting positions
-    doLayout();
+      })
+    }
+  }
+  });
+  paper.setInteractivity(false);
+  graph.addCells(Elements)
+  // Perform layout after setting positions
+  models = Elements
+  layout = doLayout();
   })
 }
 
@@ -119,11 +127,13 @@ function checkOutcomes(topic, arr, parentNode){
             const outcomeElement = linkNodes(outcome, arr, parentNode, "Outcomes")
             //Check for activities in the outcome
             checkForActivities(outcome, arr, outcomeElement)
+            createTextBlock(outcomeElement, outcome, parentNode)
           })
         }else{ //Condition if the topic has generated only one outcome
           const outcomeElement = linkNodes(topic[key], arr, parentNode, "Outcomes")
           //Check for activities in the outcome
           checkForActivities(topic[key], arr, outcomeElement)
+          createTextBlock(outcomeElement, topic[key], parentNode)
         }
       }else if(key == "sunyrdaf:includes"){
         //Creates consideration elements if a topic includes considerations
@@ -131,39 +141,6 @@ function checkOutcomes(topic, arr, parentNode){
       }
     }
 
-  }
-
-}
-
-function createTextBlock(element, node, parentNode){
-  var parentElementView = paper.findViewByModel(parentNode)
-  var elementView = paper.findViewByModel(element)
-  var bbox = parentElementView.model.getBBox();
-  var paperRect1 = paper.localToPaperRect(bbox);
-  // Draw an HTML rectangle above the element.
-  var div = document.createElement('div');
-  parentElementView.el.style.position = "relative"
-  div.style.position = 'absolute';
-  div.style.background = 'white';
-  div.textContent = node['description']
-  var length = element * 2
-  div.style.width = (300) + 'px';
-  div.style.height = (length) + 'px';
-  div.style.border = "1px solid black";
-  div.style.fontWeight = "bold"
-  div.style.fontSize = "20px"
-  div.id = element.id
-  div.style.fontFamily = "Cambria"
-  div.style.lineBreak = 0.5
-  div.style.visibility = "hidden"
-  div.style.backgroundColor = "lightgrey"
-  if(node['description'] != null){
-    paper.el.appendChild(div);
-  }else{
-    if(elementView.model.attributes.name['first'] == "Considerations"){
-      elementView.removeTools()
-    }
-    console.warn()
   }
 
 }
@@ -221,6 +198,9 @@ function checkForConsiderations(outcome, arr, parentNode){
   }
 }
 
+
+
+//*******A lot to chnage in this function as rest of the elements that are yet to be introduced are linked to this.
 //Function to Create activity nodes that are the results of the ouctomes generated
 /** 
  * Create and link Activity elements
@@ -233,28 +213,60 @@ function checkForActivities(outcome, arr, parentNode){
   for (const key in outcome){
     if(key.startsWith('sunyrdaf')){
       if(key == "sunyrdaf:resultsFrom"){
-        if(Array.isArray(outcome)){ //Conditions to create multiple activities
+        if(Array.isArray(outcome[key])){ //Conditions to create multiple activities
           outcome[key].forEach(activity =>{
             const activityElement = linkNodes(activity, arr, parentNode, "Activities")
+            if(activity['sunyrdaf:extends']){
+              var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, parentNode)
+              subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
+            }
+            if(activity['sunyrdaf:generates']){
+              checkForActivitiesTarget(activity, arr, activityElement)
+            }
+            if(activity['sunyrdaf:includes']){
+              checkForActivitiesTarget(activity, arr, activityElement)
+            }
           })
         }else{// Condition to create a single activity
           if(outcome[key]['name'] == undefined){
-            duplicateFrame.forEach(nodes =>{
-              if(nodes['@id'] == outcome[key]){
-                const activityElement = linkNodes(nodes, arr, parentNode, "Activities")
+            duplicateFrame.forEach(activity =>{
+              if(activity['@id'] == outcome[key]){
+                const activityElement = linkNodes(activity, arr, parentNode, "Activities")
+                if(activity['sunyrdaf:extends']){
+                  var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, activityElement)
+                  subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
+                }
+                if(activity['sunyrdaf:generates']){
+                  checkForActivitiesTarget(activity, arr, activityElement)
+                }
+                if(activity['sunyrdaf:includes']){
+                  checkForActivitiesTarget(activity, arr, activityElement)
+                }
               }
             })
           }else{
-            const activityElement = linkNodes(outcome[key], arr, parentNode, "Activities")
+            var activity = outcome[key]
+            const activityElement = linkNodes(activity, arr, parentNode, "Activities")
+            if(activity['sunyrdaf:extends']){
+              var subTopic = checkForSubTopics(activity['sunyrdaf:extends'], arr, parentNode)
+              subTopicTextBlock(subTopic, activityElement)    //Creates the textBlock for the SubTopic button in Activities
+            }
+            if(activity['sunyrdaf:generates']){
+              checkForActivitiesTarget(activity, arr, activityElement)
+            }
+            if(activity['sunyrdaf:includes']){
+              checkForActivitiesTarget(activity, arr, activityElement)
+            }
+
+
+
           }
         }
       }else if(key == "sunyrdaf:includes"){
         const consideration = checkForConsiderations(outcome[key], arr, parentNode)
-        var portName = ['Definition']
         if(consideration){
-          //const embedButton = buttonView("Definition", consideration, portName)
         }else{
-          console.error("Considerations Undefined")
+          //Error displayed is Considerations Undefined (Just for Debugging)
         }
       }else if(key == "sunyrdaf:extends"){
         //Instead Of creating an element and a link for the subtopic, we have just used
@@ -262,32 +274,18 @@ function checkForActivities(outcome, arr, parentNode){
         var subTopic = checkForSubTopics(outcome[key], arr, parentNode);
         if(subTopic != undefined){
           //This creates the si
-          var nodeCellView = paper.findViewByModel(parentNode)
-          var bbox = nodeCellView.model.getBBox();
-          var paperRect1 = paper.localToPaperRect(bbox);
-          // Draw an HTML rectangle above the element.
-          var div = document.createElement('div');
-          nodeCellView.el.style.position = "relative"
-          div.style.position = 'absolute';
-          div.style.background = 'white';
-          div.textContent = subTopic
-          var length = subTopic * 2
-          div.style.width = ((paperRect1.width)/2) + 'px';
-          div.style.height = (length) + 'px';
-          div.style.border = "1px solid black";
-          div.style.fontWeight = "bold"
-          div.style.fontSize = "20px"
-          div.id = parentNode.id
-          div.style.fontFamily = "Cambria"
-          div.style.lineBreak = 0.5
-          div.style.visibility = "hidden"
-          paper.el.appendChild(div);
+          subTopicTextBlock(subTopic, parentNode)
 
         }
       }
     }
   }
 }
+
+
+
+
+
 //This function creates the subtopic
 /*
   For now the subtopics are linked to its paretnode because if not linked it distracts the directed graph.
@@ -320,50 +318,51 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     var stage = createStage(childNode['@id'], childNode['name'])
     stage.prop('name/first', "Stages")
     arr.push(stage)
-    graph.addCells(stage)
     return stage;
   }
   if(typeOfNode == "Topics"){
     var topicElement = createTopics(childNode['@id'], childNode['name'])
-    const linkStageToTopics = makeLink(parentNode, topicElement)
+    var linkStageToTopics = makeLink(parentNode, topicElement)
     topicElement.prop('name/first', "Topics")
     arr.push(topicElement,linkStageToTopics)
-    graph.addCells(topicElement, linkStageToTopics)
     return topicElement;
   }
   if(typeOfNode == "Outcomes"){
-    const outcomeElement = createOutcomes(childNode['@id'], childNode['name'])
-    const linkTopicToOutcome = makeLink(parentNode, outcomeElement)
+    var outcomeElement = createOutcomes(childNode['@id'], childNode['name'])
+    var linkTopicToOutcome = makeLink(parentNode, outcomeElement)
     outcomeElement.prop('name/first', "Outcomes")
     arr.push(outcomeElement,linkTopicToOutcome)
-    graph.addCells(outcomeElement, linkTopicToOutcome)
     return outcomeElement;
   }
   if(typeOfNode == "Activities"){
-    const activityElement = createActivities(childNode['@id'], childNode['name'])
-    const linkOutcomeToActivity = makeLink(parentNode, activityElement)
+    var activityElement = createActivities(childNode['@id'], childNode['name'])
+    var linkOutcomeToActivity = makeLink(parentNode, activityElement)
     activityElement.prop('name/first', "Activities")
-    arr.push(activityElement,linkOutcomeToActivity)
+    arr.push(activityElement, linkOutcomeToActivity)
     graph.addCells(activityElement, linkOutcomeToActivity)
+    const portNameList = ['Participants', 'Methods', "Roles", "Resources", "Outputs", "RDaF Subtopic"]
+    buttonView(portNameList, activityElement)
+    createDropDownMenu(activityElement)
     return activityElement;
   }
   if(typeOfNode == "Considerations"){
     var considerationElement
-    if (multiParentElementIds[childNode['@id']]) {
+    if (createdConsidearitonElementIds.has(childNode['@id'])) {
       console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
-      considerationElement = multiParentElementIds[childNode['@id']];
-      const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-      arr.push(linkOutcomeToConsideration)
-      graph.addCells(linkOutcomeToConsideration)
+      if(multiParentElementIds[childNode['@id']]){
+        considerationElement = multiParentElementIds[childNode['@id']];
+        var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
+        considerationElement.prop('name/first', "Considerations")
+        arr.push(considerationElement, linkOutcomeToConsideration)
+      }
     }else{
       considerationElement = createConsiderations(childNode['@id'], childNode['name'])
-      graph.addCells(considerationElement)
       const embedButton = buttonView("Definition", considerationElement)
-      multiParentElementIds[childNode['@id']] = considerationElement;
+      createdConsidearitonElementIds.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = considerationElement
+      var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
       considerationElement.prop('name/first', "Considerations")
-      const linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-      graph.addCells(linkOutcomeToConsideration)
-      arr.push(considerationElement,linkOutcomeToConsideration)
+      arr.push(considerationElement, linkOutcomeToConsideration)
     }
     return considerationElement;
   }
@@ -381,61 +380,157 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     }
     return description
   }
+
+  if(typeOfNode == "Outputs"){
+    var outputElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if(multiParentElementIds[childNode['@id']]){
+        outputElement = multiParentElementIds[childNode['@id']];
+        var linkOutputToActivity = makeLink(parentNode, outputElement)
+        outputElement.prop('name/first', "Outputs")
+        arr.push(linkOutputToActivity)
+      }
+    }else{
+      outputElement = createOutputs(childNode['@id'], childNode['name'])
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = outputElement
+      var linkOutputToActivity = makeLink(parentNode, outputElement)
+      outputElement.prop('name/first', "Outputs")
+      arr.push(outputElement, linkOutputToActivity)
+    }
+    return outputElement;
+  }
+  if(typeOfNode == "Methods"){
+    let methodElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if(multiParentElementIds[childNode['@id']]){
+        methodElement = multiParentElementIds[childNode['@id']];
+        var linkMethodToActivity = makeLink(parentNode, methodElement)
+        methodElement.prop('name/first', "Methods")
+        arr.push(linkMethodToActivity)
+      }
+    }else{
+      methodElement = createMethods(childNode['@id'], childNode['name'])
+      var linkMethodToActivity = makeLink(parentNode, methodElement)
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = methodElement
+      methodElement.prop('name/first', "Methods")
+      arr.push(methodElement, linkMethodToActivity)
+    }
+    return methodElement;
+  }
+  if(typeOfNode == "Participants"){
+    let participantElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if((multiParentElementIds[childNode['@id']])){
+        participantElement = multiParentElementIds[childNode['@id']];
+        var linkParticipantToActivity = makeLink(parentNode, participantElement)
+        participantElement.prop('name/first', "Participants")
+        arr.push(participantElement,linkParticipantToActivity)
+      }
+    }else{
+      participantElement = createParticipants(childNode['@id'], childNode['name'])
+      var linkParticipantToActivity = makeLink(parentNode, participantElement)
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = participantElement
+      participantElement.prop('name/first', "Participants")
+      arr.push(participantElement, linkParticipantToActivity)
+    }
+    return participantElement;
+  }
+  if(typeOfNode == "Roles"){
+    let roleElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if((multiParentElementIds[childNode['@id']])){
+        roleElement =  multiParentElementIds[childNode['@id']];
+        var linkRoleToActivity = makeLink(parentNode, roleElement)
+        roleElement.prop('name/first', "Roles")
+        arr.push(linkRoleToActivity)
+      }
+    }else{
+      roleElement = createRoles(childNode['@id'], childNode['name'])
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = roleElement
+      var linkRoleToActivity = makeLink(parentNode, roleElement)
+      roleElement.prop('name/first', "Roles")
+      arr.push(roleElement, linkRoleToActivity)
+    }
+    return roleElement;
+  }
+  if(typeOfNode == "Resources"){
+    let resourceElement;
+    if(createdActivityTargets.has(childNode['@id'])){
+      //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if((multiParentElementIds[childNode['@id']])){
+        resourceElement =  multiParentElementIds[childNode['@id']];
+        var linkResourceToActivity = makeLink(parentNode, resourceElement)
+        resourceElement.prop('name/first', "Resources")
+        arr.push(linkResourceToActivity)
+      }
+    }else{
+      resourceElement = createResources(childNode['@id'], childNode['name'])
+      createdActivityTargets.add(childNode['@id'])
+      multiParentElementIds[childNode['@id']] = resourceElement
+      var linkResourceToActivity = makeLink(parentNode, resourceElement)
+      resourceElement.prop('name/first', "Resources")
+      resourceElement.prop('resource/Link', childNode['@id'])
+      arr.push(resourceElement, linkResourceToActivity)
+    }
+    return resourceElement;
+  }
 }
 
-function doLayout() {
+
+function doLayout(parentElement, el) {
   // Apply layout using DirectedGraph plugin
   var visibleElements = []
   //Checks for the visible elements on the graph when an event occurs and adds it to the layout
   models.forEach(el =>{
-    if(!el.get('hidden') ){
-      visibleElements.push(el)
+    if(!el.get('hidden')){
+      // if(elementsAlreayinLayout.has(el)){
+      //   console.log()
+      // }else{
+        visibleElements.push(el)
+      //}
     }
   })
+
+
+
+
   layout = joint.layout.DirectedGraph.layout(visibleElements, {
     setVertices: false,
     rankDir: 'LR',
-    nodeSep: 50, // Increase the separation between adjacent nodes
-    edgeSep: 10, // Increase the separation between adjacent edges
-    rankSep: 0, // Increase the separation between node layers
     marginX: 50, // Add margin to the left and right of the graph
-    marginY: 50, // Add margin to the top and bottom of the graph
+    marginY: 0, // Add margin to the top and bottom of the graph
     resizeClusters: false,
     setPosition: (element, position) => {
       // Align elements to the left by setting their x-coordinate
-      setElementsPosition(element, position)
+      setElementsPosition(element, position, parentElement)
+      // if(elementsAlreayinLayout.has(element)){
+      //   console.log()
+      // }else{
+      //   //elementsAlreayinLayout.add(element)
+      // }
     }
   });
+
   setRootToFix();       //Sets the position of the root elements
   setLinkVertices();    //Sets the vertices that is, marks the points where the links should route from
 }
 
-function init() {
-  // initialize the graph
+function init(){
+  // Create a new directed graph
   graph = new dia.Graph({}, { cellNamespace: shapes });
-
-  let CustomLinkView = joint.dia.LinkView.extend({
-    // custom interactions:
-    pointerdblclick: function(evt, x, y) {
-      this.addVertex(x, y);
-    },
-    contextmenu: function(evt, x, y) {
-      this.addLabel(x, y);
-    },
-    // custom options:
-    options: joint.util.defaults({
-      doubleLinkTools: true,
-    }, 
-    joint.dia.LinkView.prototype.options)
-  });
-
-
   // Create a new paper, which is a wrapper around SVG element
   paper = new dia.Paper({
     interactive: { vertexAdd: false }, // disable default vertexAdd interaction
     el: document.getElementById('graph-container'),
     model: graph,
-    linkView: CustomLinkView,
     interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
     width: 10000, //window.innerWidth,
     height: 50000,//window.innerHeight,
@@ -462,17 +557,8 @@ function init() {
   });
 
   // Fit the paper content to the container size
-  paper.transformToFitContent()
-
-  /*
-    There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
-  */
-  paper.on('element:pointerclick', function(view, evt) {
-    evt.stopPropagation();
-    if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
-      toggleBranch(view.model);
-    }
-  })
+  paper.transformToFitContent();
   buildTheGraph();
+
 }
 

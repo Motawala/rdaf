@@ -52,22 +52,6 @@ function radioButton(port, index, name){
 }
 
 
-//Test Case to test circle button
-var rect = new joint.shapes.standard.Rectangle({
-    position: { x: 275, y: 50 },
-    size: { width: 400, height: 40 },
-    attrs: {
-        body: {
-            fill: '#8ECAE6'
-        },
-    },
-    ports: {
-        items: [ ],
-        selector: 'portBody'
-    },
-});
-
-
 //This function takes in a list of ports that are to be embeded into the element,
 //Make sure the port Ids of the ports are always different
 //Creates a set of 3 circle buttons that are required in the Activities
@@ -92,14 +76,15 @@ function buttonView(portName, element){
   var subTopicPort = createPort("RDaF Subtopic", 'out', 'Port 5')
   // Add custom tool buttons for each port
   var tool = [];
-  element.addPort(port);
-  element.addPort(considerationPort)
-  element.addPort(subTopicPort)
 
   //Create the Button
   if(portName == "Considerations"){
+    element.addPort(considerationPort)
     tool.push(createConsiderationButton(port))
   }if(portName == "Activities"){
+    element.addPort(port);
+    element.addPort(considerationPort)
+    element.addPort(subTopicPort)
     tool.push(createConsiderationButton(considerationPort))
     tool.push(createButton(port))
     //Push the circle buttons to the same list
@@ -108,17 +93,44 @@ function buttonView(portName, element){
     tool.push(createSubTopicButton(subTopicPort))
   }
   if(portName == "Outcomes"){
-    const button = createButton(port)
-    tool.push(button)
+    element.addPort(port);
+    tool.push(createButton(port))
   }
   if(portName == "Definition"){
+    element.addPort(port);
     tool.push(createDefinitionButton(port))
+  }
+  if(Array.isArray(portName)){
+    portName.forEach(ports =>{
+      var port1 = createPort(ports, 'out', "Port3");
+      element.addPort(port1)
+      if(ports == "Participants"){
+        tool.push(createParticipantsButton(port1))
+      }
+      if(ports == "Roles"){
+        tool.push(createRolesButton(port1))
+      }
+      if(ports == "Methods"){
+        tool.push(createMethodButton(port1))
+      }
+      if(ports == "Resources"){
+        tool.push(createResourcesButton(port1))
+      }
+      if(ports == "Outputs"){
+        tool.push(createOutputButton(port1))
+      }
+      if(ports == "RDaF Subtopic"){
+        tool.push(createSubTopicButton(port1))
+      }
+    })
   }
   createElementView(element, tool)
 
 }
 
 function createElementView(element, tool){
+  //add the element to the graph
+  graph.addCells(element);
   toolsView = new joint.dia.ToolsView({ tools: tool});
   //Create an element view
   var elementView = element.findView(paper)
@@ -164,7 +176,7 @@ function createConsiderationButton(port,pos) {
           }
         }
       ],
-      x: "97%", // Button position X
+      x: "100%", // Button position X
       y: "50%", // Button position Y
       //ffset: { x: -8, y: -8 },
       action: function(evt,elementView) {
@@ -256,7 +268,7 @@ function createButton(port,pos) {
               }
           }
       ],
-      x: "97%", // Button position X
+      x: "100%", // Button position X
       y: "20%", // Button position Y
       action: function(evt, elementView) {
         toggelButton(this.model, `${port.id}`)
@@ -274,10 +286,8 @@ function createDefinitionButton(port,pos) {
         selector: 'button',
         attributes: {
             'id': port.id,
-            'width': 120,
+            'width': 70,
             'height': 20,
-            'rx': 10, // Border radius
-            'ry': 10, // Border radius
             'fill': 'black', // Button background color
             'stroke': 'black', // Button border color
             'stroke-width': 2, // Button border width
@@ -294,14 +304,14 @@ function createDefinitionButton(port,pos) {
             'font-family': 'Arial',
             'text-anchor': 'middle',
             'fill': 'white',
-            'x':60,
+            'x':35,
             'y': 15, // Adjust text position
             'cursor': 'pointer'
         }
       }
     ],
-    x: "90%", // Button position X
-    y: "70%", // Button position Y
+    x: "80%", // Button position X
+    y: "45%", // Button position Y
     offset: { x: -8, y: -8 },
     action: function(evt,elementView) {
       //Event Handler for the button.
@@ -310,4 +320,213 @@ function createDefinitionButton(port,pos) {
   return button;
 }
 
+function createMethodButton(port,pos) {
+  var button  = new joint.elementTools.Button({
+    markup: [
+        {
+            tagName: 'rect',
+            selector: 'button',
+            attributes: {
+                'id': port.id,
+                'width': 115,
+                'height': 20,
 
+                'fill': '#ffffb3', // Button background color
+                'stroke': 'black', // Button border color
+                'stroke-width': 2, // Button border width
+                'cursor': 'pointer'
+            }
+        },
+        {
+            tagName: 'text',
+            selector: 'text',
+            textContent: port.id, // Text displayed on the button
+            attributes: {
+              'fontweight':'bold',
+                'fill': 'black', // Text color
+                'font-size': '15px',
+                'font-family': 'Arial',
+                'text-anchor': 'middle',
+                'x': 55,
+                'y': 15, // Adjust text position
+                'cursor': 'pointer'
+            }
+        }
+    ],
+    x: "75%", // Button position X
+    y: "0%", // Button position Y
+    action: function(evt, elementView) {
+      toggelButton(this.model, `${port.id}`)
+    },
+  });
+  return button;
+}
+
+function createRolesButton(port,pos) {
+  var button  = new joint.elementTools.Button({
+    markup: [
+        {
+            tagName: 'rect',
+            selector: 'button',
+            attributes: {
+                'id': port.id,
+                'width': 115,
+                'height': 20,
+
+                'fill': '#ffffb3', // Button background color
+                'stroke': 'black', // Button border color
+                'stroke-width': 2, // Button border width
+                'cursor': 'pointer'
+            }
+        },
+        {
+            tagName: 'text',
+            selector: 'text',
+            textContent: port.id, // Text displayed on the button
+            attributes: {
+              'fontweight':'bold',
+                'fill': 'black', // Text color
+                'font-size': '15px',
+                'font-family': 'Arial',
+                'text-anchor': 'middle',
+                'x': 55,
+                'y': 15, // Adjust text position
+                'cursor': 'pointer'
+            }
+        }
+    ],
+    x: "75%", // Button position X
+    y: "20%", // Button position Y
+    action: function(evt, elementView) {
+      toggelButton(this.model, `${port.id}`)
+    },
+  });
+  return button;
+}
+
+function createParticipantsButton(port,pos) {
+  var button  = new joint.elementTools.Button({
+    markup: [
+        {
+            tagName: 'rect',
+            selector: 'button',
+            attributes: {
+                'id': port.id,
+                'width': 115,
+                'height': 20,
+
+                'fill': '#ffffb3', // Button background color
+                'stroke': 'black', // Button border color
+                'stroke-width': 2, // Button border width
+                'cursor': 'pointer'
+            }
+        },
+        {
+            tagName: 'text',
+            selector: 'text',
+            textContent: port.id, // Text displayed on the button
+            attributes: {
+              'fontweight':'bold',
+                'fill': 'black', // Text color
+                'font-size': '15px',
+                'font-family': 'Arial',
+                'text-anchor': 'middle',
+                'x': 55,
+                'y': 15, // Adjust text position
+                'cursor': 'pointer'
+            }
+        }
+    ],
+    x: "75%", // Button position X
+    y: "40%", // Button position Y
+    action: function(evt, elementView) {
+      toggelButton(this.model, `${port.id}`)
+    },
+  });
+  return button;
+}
+
+function createOutputButton(port,pos) {
+  var button  = new joint.elementTools.Button({
+    markup: [
+        {
+            tagName: 'rect',
+            selector: 'button',
+            attributes: {
+                'id': port.id,
+                'width': 115,
+                'height': 20,
+
+                'fill': '#ffffb3', // Button background color
+                'stroke': 'black', // Button border color
+                'stroke-width': 2, // Button border width
+                'cursor': 'pointer'
+            }
+        },
+        {
+            tagName: 'text',
+            selector: 'text',
+            textContent: port.id, // Text displayed on the button
+            attributes: {
+              'fontweight':'bold',
+                'fill': 'black', // Text color
+                'font-size': '15px',
+                'font-family': 'Arial',
+                'text-anchor': 'middle',
+                'x': 55,
+                'y': 15, // Adjust text position
+                'cursor': 'pointer'
+            }
+        }
+    ],
+    x: "75%", // Button position X
+    y: "80%", // Button position Y
+    action: function(evt, elementView) {
+      toggelButton(this.model, `${port.id}`)
+    },
+  });
+  return button;
+}
+
+
+function createResourcesButton(port,pos) {
+  var button  = new joint.elementTools.Button({
+    markup: [
+        {
+            tagName: 'rect',
+            selector: 'button',
+            attributes: {
+                'id': port.id,
+                'width': 115,
+                'height': 20,
+
+                'fill': '#ffffb3', // Button background color
+                'stroke': 'black', // Button border color
+                'stroke-width': 2, // Button border width
+                'cursor': 'pointer'
+            }
+        },
+        {
+            tagName: 'text',
+            selector: 'text',
+            textContent: port.id, // Text displayed on the button
+            attributes: {
+              'fontweight':'bold',
+                'fill': 'black', // Text color
+                'font-size': '15px',
+                'font-family': 'Arial',
+                'text-anchor': 'middle',
+                'x': 55,
+                'y': 15, // Adjust text position
+                'cursor': 'pointer'
+            }
+        }
+    ],
+    x: "75%", // Button position X
+    y: "60%", // Button position Y
+    action: function(evt, elementView) {
+      toggelButton(this.model, `${port.id}`)
+    },
+  });
+  return button;
+}

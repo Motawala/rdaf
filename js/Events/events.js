@@ -1,3 +1,30 @@
+
+/*
+There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
+*/
+paper.on('element:pointerclick', function(view, evt) {
+    //evt.stopPropagation();
+    if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
+    toggleBranch(view.model);
+    }
+    // resetting the layout here has an effect after collapsing and then moving the topic nodes
+    // manually to be closer (it moves them so the expanded nodes will fit if you re-expand after
+    // moving. It doesn't seem to have any effect after just collapsing a node's children
+    // though. So I think it has promise as an approach but more work is needed to figure out
+    // how to get the layout to redraw everytime the way we want it to
+})
+
+paper.on('element:pointerclick', function(view, evt) {
+    //evt.stopPropagation();
+    const model = view.model
+    if(model.attributes.name['first'] == 'Resources'){
+        const url = model.attributes.resource['Link']
+        window.open(url, '_blank')
+    }
+})
+
+
+
 function toggleBranch(child) {
     if(child.isElement()){
         //retrives the value of the collapsed attribute from the root model.
@@ -60,27 +87,38 @@ function openBranch(child, shouldHide){
 function closeTheRest(element){
     //This condition closes all the nodes when the user intereacts with the parentNode
     const subElementsLinks = graph.getConnectedLinks(element, {outbound:true})
-    subElementsLinks.forEach(subLinks =>{
-        if(subLinks != undefined){
-            subLinks.set('hidden', true)
-        subLinks.set('collapsed', false)
-        }else{
-            console.error("Element already closed")
-        }
-    });
-
-
     const successrorCells = graph.getSubgraph([
         ...graph.getSuccessors(element),
     ])
-    successrorCells.forEach(function(successor) {
-        if(successor != undefined){
-            successor.set('hidden', true);
-            successor.set('collapsed', false);
+    subElementsLinks.forEach(subLinks =>{
+        if(subLinks != undefined && !subLinks.get('hidden')){
+            subLinks.set('hidden', true)
+            subLinks.set('collapsed', false)
+            successrorCells.forEach(function(successor) {
+                if(successor != undefined){
+                    successor.set('hidden', true);
+                    successor.set('collapsed', false);
+
+                }else{
+                    console.error("Element already closed")
+                }
+            });
+            const graphLinks = (graph.getLinks())
+            graphLinks.forEach(links =>{
+                if(!links.get('hidden') && links.getTargetElement()){
+                    if(links.getTargetElement().get('hidden')){
+                        links.getTargetElement().set('hidden', false)
+                        links.set('collapsed', true)
+                    }
+                }
+            })
         }else{
             console.error("Element already closed")
         }
     });
+
+
+
 }
 
 
@@ -143,7 +181,7 @@ function radioButtonEvents(elementView, port){
             //When clicked on Achieved, hide the activity button
             if(activityButton.style.visibility == "visible" || considerationButton.style.visibility == "visible"){
                 var rectElement = (elementView.el.querySelector('rect'))
-                var width = parseInt(rectElement.getAttribute('width')) - 80
+                var width = parseInt(rectElement.getAttribute('width')) - 115
                 rectElement.setAttribute('width', width)
                 //This condition is applied when user wants to hide all the elements including Activities and Considerations
                 const OutboundLinks = graph.getConnectedLinks(elementView.model, {outbound:true})
@@ -185,7 +223,7 @@ function radioButtonEvents(elementView, port){
             //When clicked on In Progress button, show the activity button
             if(activityButton.style.visibility == "hidden" || considerationButton.style.visibility == "hidden" && (activityButton || considerationButton)){
                 var rectElement = (elementView.el.querySelector('rect'))
-                var width = parseInt(rectElement.getAttribute('width')) + 80
+                var width = parseInt(rectElement.getAttribute('width')) + 115
                 rectElement.setAttribute('width', width)
                 updateAnchorConnection(elementView.model)
             }else{
@@ -202,7 +240,7 @@ function radioButtonEvents(elementView, port){
             //When clicked on Not Started Button, show the activity button
             if(activityButton.style.visibility == "hidden" || considerationButton.style.visibility == "hidden" && (activityButton || considerationButton)){
                 var rectElement = (elementView.el.querySelector('rect'))
-                var width = parseInt(rectElement.getAttribute('width')) + 80
+                var width = parseInt(rectElement.getAttribute('width')) + 115
                 rectElement.setAttribute('width', width)
                 updateAnchorConnection(elementView.model)
             }else{
@@ -226,7 +264,9 @@ function radioButtonEvents(elementView, port){
 
 
 function defaultEvent(node, typeOfPort){
-    if(node.get('collapsed')){
+    let parentElement;
+    let visibleElement;
+    if(!node.get('collapsed')){
         const OutboundLinks = graph.getConnectedLinks(node, {outbound:true})
         if(Array.isArray(OutboundLinks)){
             OutboundLinks.forEach(links =>{
@@ -236,6 +276,7 @@ function defaultEvent(node, typeOfPort){
                         links.getTargetElement().set('collapsed', true)
                         links.set('hidden', false)
                         links.set('collapsed', true)
+                        visibleElement = links.getTargetElement()
                         if(typeOfPort == "Outcomes"){
                         //Using the html element (Activity button) to hide and show the particular button from the entire ElementView
                             var elementView = links.getTargetElement().findView(paper)
@@ -260,7 +301,7 @@ function defaultEvent(node, typeOfPort){
                     console.error("Link Array is not defined")
                 }
             })
-            doLayout()
+            doLayout(parentElement, visibleElement)
         }
     }else{
         const OutboundLinks = graph.getConnectedLinks(node, {outbound:true})
@@ -280,6 +321,7 @@ function defaultEvent(node, typeOfPort){
                             links.getTargetElement().set('hidden', false)
                             links.getTargetElement().set('collapsed', true)
                             links.set('hidden', false)
+                            doLayout()
                         }
                     })
                 }
@@ -309,7 +351,6 @@ function defaultEvent(node, typeOfPort){
                 }
             }
         })
-        //doLayout()
     }
 }
 
@@ -355,118 +396,6 @@ function closeTheRest1(element){
     }
 }
 
-
-
-//In order to see the effect of this function minimize the page to 25% because the subtopic elements are scattered througout the page
-//Show the subtopic when the enters the cell view of the subtopic button
-paper.on('cell:mouseover', function(cellView) {
-    try {
-      //From the element view look for the element tools
-        var toolsArray = cellView._toolsView.tools
-        toolsArray.forEach(element => {
-            if (element.childNodes && element.childNodes.button) {
-                    const subtopicButton = element.$el[0]
-                    subtopicButton.addEventListener('mouseover', function() {
-                        // Your mouseover event handling code here
-                        var bbox = cellView.model.getBBox();
-                        var paperRect1 = paper.localToPaperRect(bbox);
-                        if(element.childNodes.button.id == "RDaF Subtopic"){
-                            // Set the position of the element according to the pointer and make it visible
-                            var textBlock = document.getElementById(cellView.model.id)
-                            textBlock.style.left = ((paperRect1.x) + 10) + 'px';
-                            textBlock.style.top = ((paperRect1.y) + 55) + 'px';
-                            textBlock.style.visibility = "visible"
-                        }
-                        else if(element.childNodes.button.id == "Definition"){
-                            // Set the position of the element according to the pointer and make it visible
-                            var textBlock = document.getElementById(cellView.model.id)
-                            if(textBlock != null){
-                                textBlock.style.left = ((paperRect1.x) + 10) + 'px';
-                                textBlock.style.top = ((paperRect1.y) + 55) + 'px';
-                                textBlock.style.visibility = "visible"
-                            }
-                        }
-                        else if(element.childNodes.button.id == "Activities"){
-                                element.childNodes.button.setAttribute('fill', 'lightgrey')
-                                var textBlock = document.getElementById(cellView.model.id)
-                                textBlock.style.left = (paperRect1.x + 100);
-                                textBlock.style.top = ((paperRect1.y) + 40) + 'px';
-                                //textBlock.style.visibility = "visible"
-                        }
-                        else if(element.childNodes.button.id == "Considerations"){
-                                element.childNodes.button.setAttribute('fill', 'lightgrey')
-                                var textBlock = document.getElementById(cellView.model.id)
-                                textBlock.style.left = "10%";
-                                textBlock.style.top = ((paperRect1.y) + 60) + 'px';
-                                //textBlock.style.visibility = "visible"
-                        }
-                        else if(element.childNodes.button.id == "Outcomes"){
-                            element.childNodes.button.setAttribute('fill', 'lightgrey')
-                            var textBlock = document.getElementById(cellView.model.id)
-                            textBlock.style.left = "10%";
-                            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
-                            textBlock.style.visibility = "visible"
-                        }
-                        else{
-                            console.log()
-                        }
-                    });
-            }else {
-                console.log();
-            }
-        });
-    } catch (error) {
-        console.error();
-    }
-});
-
-  //In order to see the effect of this function minimize the page to 25% because the subtopic elements are scattered througout the page
-  //Hide the subtopic when the mouse pointer leaves the button
-    paper.on('cell:mouseleave', function(cellView) {
-    try {
-        //From the element View look for the element tools
-        var toolsArray = cellView._toolsView.tools
-        toolsArray.forEach(element => {
-            if (element.childNodes && element.childNodes.button) {
-                const subtopicButton = element.$el[0]
-                subtopicButton.addEventListener('mouseleave', function() {
-                    // Set the position of the element according to the pointer and make it visible
-                    //Look for any events on subtopic button
-                    if(element.childNodes.button.id == "RDaF Subtopic"){
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
-                    }
-                    else if(element.childNodes.button.id == "Definition"){
-                        // Set the position of the element according to the pointer and make it visible
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
-                    }
-                    else if(element.childNodes.button.id == "Activities"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
-                    }
-                    else if(element.childNodes.button.id == "Considerations"){
-                        element.childNodes.button.setAttribute('fill', '#ffbf80')
-                    }
-                    else if(element.childNodes.button.id == "Outcomes"){
-                        element.childNodes.button.setAttribute('fill', '#ffffb3')
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
-                    }
-                    else{
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
-                    }
-                });
-            }else {
-                console.log();
-            }
-        });
-    } catch (error) {
-        console.error();
-    }
-})
 
 function removeUnwantedButton(elementView, outboundLinks, activityButton, considerationButton){
     var activitiesElements = []
