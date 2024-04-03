@@ -1,7 +1,7 @@
 /*
     CIRCLE BUTTON
 */
-function radioButton(port, index, name){
+function radioButton(port, index, name, fill){
   if(name == "Not Started"){
     var space = 100
     var buttonWidth = (index - 300) / 2
@@ -20,7 +20,7 @@ function radioButton(port, index, name){
           attributes: {
             'id': port.id,
             'r': 10,
-            'fill': 'white', // Button background color
+            'fill': fill, // Button background color
             'stroke': 'black', // Button border color
             'stroke-width': 2, // Button border width
             'cursor': 'pointer',
@@ -62,9 +62,10 @@ function radioButtonView(portNameList, element, tools){
   element.addPort(port1)
   element.addPort(port2)
   element.addPort(port3)
-  tools.push(radioButton(port1, element.size().width, 'Not Started'))
-  tools.push(radioButton(port2, element.size().width, 'In Progress'))
-  tools.push(radioButton(port3, element.size().width, "Achieved"))
+  fillColor = 'white'
+  tools.push(radioButton(port1, element.size().width, 'Not Started',fillColor))
+  tools.push(radioButton(port2, element.size().width, 'In Progress',fillColor))
+  tools.push(radioButton(port3, element.size().width, "Achieved",fillColor))
 }
 var i = 0
 /*

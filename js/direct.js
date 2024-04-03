@@ -10,6 +10,7 @@ var createdConsidearitonElementIds = new Set();   //This set stores all the mult
 var multiParentElementIds = {};
 var createdActivityTargets = new Set();
 var elementsAlreayinLayout = new Set();
+var scorecard = {};
 
 // initialize 
 init(); 
@@ -125,9 +126,21 @@ function checkOutcomes(topic, arr, parentNode){
         if(Array.isArray(topic[key])){
           topic[key].forEach(outcome =>{
             const outcomeElement = linkNodes(outcome, arr, parentNode, "Outcomes")
+	    // Check for a score
+	    score = checkForScore(outcome);
+            
             //Check for activities in the outcome
             checkForActivities(outcome, arr, outcomeElement)
             createTextBlock(outcomeElement, outcome, parentNode)
+	    elementView = outcomeElement.findView(paper)
+            if (score == 0 ) {
+                radioButtonEvents(elementView, { 'id':'NT1' })
+            } else if (score == 1) { 
+                radioButtonEvents(elementView, { 'id': 'PG1'})
+            } else if (score == 2) { 
+                radioButtonEvents(elementView, { 'id': 'AC1'})
+            }
+
           })
         }else{ //Condition if the topic has generated only one outcome
           const outcomeElement = linkNodes(topic[key], arr, parentNode, "Outcomes")
@@ -521,6 +534,16 @@ function doLayout(parentElement, el) {
 
   setRootToFix();       //Sets the position of the root elements
   setLinkVertices();    //Sets the vertices that is, marks the points where the links should route from
+}
+
+function checkForScore(outcome) {
+    if (outcome["sunyrdaf:hasScore"]) {
+        scorecard[outcome['@id']] = outcome["sunyrdaf:hasScore"];
+    } else {
+        scorecard[outcome['@id']] = -1;
+    }
+    return scorecard[outcome['@id']]
+
 }
 
 function init(){

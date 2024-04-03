@@ -169,6 +169,7 @@ function hideSubtopic(node, typeOfPort){
 //This function handles the event for the 3 buttons on the outcomes node
 function radioButtonEvents(elementView, port){
     var circleElements = elementView._toolsView.$el[0].querySelectorAll('circle')
+    var score = getScore(elementView.model)
     circleElements.forEach(circleElement =>{
     //Still need to wrap around this event because we just need to set one button at a time not all should be selected.
     var activityButton = elementView._toolsView.tools[1].el
@@ -178,6 +179,7 @@ function radioButtonEvents(elementView, port){
     //Change the color of the element when clicked
     if(circleElement.id == `${port.id}`){
         if(circleElement.id.startsWith('A')){
+	    score = 2;
             //When clicked on Achieved, hide the activity button
             if(activityButton.style.visibility == "visible" || considerationButton.style.visibility == "visible"){
                 var rectElement = (elementView.el.querySelector('rect'))
@@ -220,6 +222,8 @@ function radioButtonEvents(elementView, port){
 
         }
         if(circleElement.id.startsWith('P')){
+	    score = 1;
+            //When clicked on Achieved, hide the activity button
             //When clicked on In Progress button, show the activity button
             if(activityButton.style.visibility == "hidden" || considerationButton.style.visibility == "hidden" && (activityButton || considerationButton)){
                 var rectElement = (elementView.el.querySelector('rect'))
@@ -237,6 +241,7 @@ function radioButtonEvents(elementView, port){
             circleElement.setAttribute('fill', 'Orange')
         }
         if(circleElement.id.startsWith('N')){
+	    score = 0;
             //When clicked on Not Started Button, show the activity button
             if(activityButton.style.visibility == "hidden" || considerationButton.style.visibility == "hidden" && (activityButton || considerationButton)){
                 var rectElement = (elementView.el.querySelector('rect'))
@@ -258,6 +263,7 @@ function radioButtonEvents(elementView, port){
         circleElement.setAttribute('fill', 'white')
     }
     })
+    updateScorecard(elementView.model,score);
 }
 
 
@@ -287,6 +293,7 @@ function defaultEvent(node, typeOfPort){
                                 Actbutton.style.visibility = "hidden"
                                 ConsiderationButtton.style.visibility = "hidden"
                                 const circleElement = elementView._toolsView.$el[0].querySelectorAll('circle')
+
                                 //If the user has selected Not Started or In progress on Outcome, Below condition checks the status while opening and closing the outcome
                                 circleElement.forEach(circle =>{
                                     if(circle.getAttribute('fill') == "Red" || circle.getAttribute('fill') == "Orange"){
@@ -427,3 +434,13 @@ function setTimeOut(){
         console.log();
       }, 100000000); // Change 1000 to the desired timeout in milliseconds
 }
+
+function getScore(model) {
+    return scorecard[model.id];
+}
+
+function updateScorecard(model,score) {
+    scorecard[model.id] = score;
+    console.log(scorecard);
+}
+

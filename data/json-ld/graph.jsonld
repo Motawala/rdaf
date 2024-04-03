@@ -2716,7 +2716,8 @@
             ],
             "sunyrdaf:extends": [
                 "https://data.suny.edu/entities/oried/rdaf/nist/E.1.1"
-            ]
+            ],
+            "sunyrdaf:hasScore": 1
         },
         {
             "@id": "https://data.suny.edu/entities/oried/rdaf/suny/output.1",
