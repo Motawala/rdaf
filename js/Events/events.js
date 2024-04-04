@@ -2,22 +2,12 @@
 /*
 There is not button set on the Stages yet so this is an event handler for when clicked on any of the stages
 */
-paper.on('element:pointerclick', function(view, evt) {
-    //evt.stopPropagation();
-    if(view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || view.model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
-    toggleBranch(view.model);
+paper.on('element:pointerdown', function(cellView, evt) {
+    const model = cellView.model
+    if(model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/E" || model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/P" || model['id'] == "https://data.suny.edu/entities/oried/rdaf/nist/GA"){
+        toggleBranch(model);
     }
-    // resetting the layout here has an effect after collapsing and then moving the topic nodes
-    // manually to be closer (it moves them so the expanded nodes will fit if you re-expand after
-    // moving. It doesn't seem to have any effect after just collapsing a node's children
-    // though. So I think it has promise as an approach but more work is needed to figure out
-    // how to get the layout to redraw everytime the way we want it to
-})
-
-paper.on('element:pointerclick', function(view, evt) {
-    //evt.stopPropagation();
-    const model = view.model
-    if(model.attributes.name['first'] == 'Resources'){
+    if(model.attributes.name && model.attributes.name['first'] == 'Resources'){
         const url = model.attributes.resource['Link']
         window.open(url, '_blank')
     }
@@ -46,6 +36,8 @@ function openBranch(child, shouldHide){
         //Target Elements only allow access to the first connected Element of the parent.
         const element = targetLink.getTargetElement()
         if(element){
+            animateElement(element, true);
+            animateElement(targetLink, true)
             element.set('hidden', shouldHide)
             element.set('collapsed', false)
             //Make the links visible
@@ -57,25 +49,17 @@ function openBranch(child, shouldHide){
                     subLinks.set('hidden', true)
                     subLinks.set('collapsed', false)
                 });
-
                 const successrorCells = graph.getSubgraph([
                     ...graph.getSuccessors(element),
                 ])
                 successrorCells.forEach(function(successor) {
                     successor.set('hidden', true);
                     successor.set('collapsed', false);
-
                 });
             }else{
                 console.error("Element Undefined")
             }
         }
-        //closeTheRest(element)
-	// I don't think I'm calling this correctly, or in the right
-	// place but see https://resources.jointjs.com/docs/jointjs/v3.7/joint.html#dia.LinkView.prototype.requestConnectionUpdate
-	// in theory it should help with recalculating the routes after
-	// things move
-        //What I have implemented below works fine and is a good way to hide when we stop at one point in the tree, but I look into it and see if it helps
     })
     doLayout();
 }
@@ -196,6 +180,7 @@ function radioButtonEvents(elementView, port){
                     const orphanLink = graph.getConnectedLinks(links.getTargetElement(), {inbound:true})
                     if(orphanLink.length > 1){
                         orphanLink.forEach(links =>{
+
                             if(!links.get('hidden')){
                                 links.getTargetElement().set('hidden', false)
                                 links.getTargetElement().set('collapsed', true)
@@ -264,7 +249,6 @@ function radioButtonEvents(elementView, port){
 
 
 function defaultEvent(node, typeOfPort){
-    let parentElement;
     let visibleElement;
     if(!node.get('collapsed')){
         const OutboundLinks = graph.getConnectedLinks(node, {outbound:true})
@@ -272,11 +256,14 @@ function defaultEvent(node, typeOfPort){
             OutboundLinks.forEach(links =>{
                 if(links && links.getTargetElement()){
                     if(links.getTargetElement().prop('name/first') == typeOfPort){
+                        const el = links.getTargetElement()
+                        // Animate showing the element
+                        animateElement(el, true);
+                        animateElement(links, true)
                         links.getTargetElement().set('hidden', false)
                         links.getTargetElement().set('collapsed', true)
                         links.set('hidden', false)
                         links.set('collapsed', true)
-                        visibleElement = links.getTargetElement()
                         if(typeOfPort == "Outcomes"){
                         //Using the html element (Activity button) to hide and show the particular button from the entire ElementView
                             var elementView = links.getTargetElement().findView(paper)
@@ -350,11 +337,38 @@ function defaultEvent(node, typeOfPort){
                 }
             }
         })
-        //doLayout()
     }
 }
 
+// Function to animate showing or hiding an element
+function animateElement(element, show) {
+    const duration = 1000; // Animation duration in milliseconds
+    const startValue = show ? 0 : 1;
+    const endValue = show ? 1 : 0;
+    const property = 'opacity';
+    const elementView = paper.findViewByModel(element)
+    const htmlEl = elementView.$el[0]
+    htmlEl.style[property] = startValue;
+    htmlEl.animate(
+        { [property]: [startValue + 0.3, endValue] },
+        { duration: duration, fill: 'forwards' }
+    );
+}
 
+
+function animateElementClose(element, show){
+    const duration = 1000; // Animation duration in milliseconds
+    const startValue = show ? 0 : 1;
+    const endValue = show ? 1 : 0;
+    const property = 'opacity';
+    const elementView = paper.findViewByModel(element)
+    const htmlEl = elementView.$el[0]
+    htmlEl.style.opacity = startValue;
+    htmlEl.animate(
+        { opacity: [startValue + 0.3, endValue] },
+        { duration: duration, fill: 'forwards' }
+    );
+}
 
 function removeUnwantedButton(elementView, outboundLinks, activityButton, considerationButton){
     var activitiesElements = []
@@ -379,12 +393,4 @@ function removeUnwantedButton(elementView, outboundLinks, activityButton, consid
         }
     }
 }
-
-function setTimeOut(){
-    hoverTimeout = setTimeout(function() {
-        // Your hover action goes here
-        console.log();
-      }, 100000000); // Change 1000 to the desired timeout in milliseconds
-}
-
 

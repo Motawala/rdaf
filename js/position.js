@@ -44,9 +44,9 @@ function setLinkVertices(){
                     {x: sourceMidX, y: sourceMidY},
                     {x: targetX , y: targetMidY}
                 ])
-                const sourceNodeType = sourceCell.attributes.name['first']
+                const sourceButtonType = sourceCell.attributes.name['first']
                 // Different settings for the vertices from the Outcomes as multiple outcomes shares same activities
-                if(sourceNodeType == "Outcomes" || sourceNodeType == "Resources" || sourceNodeType == "Participants" || sourceNodeType == "Outputs"){
+                if(sourceButtonType == "Outcomes" || sourceButtonType == "Resources" || sourceButtonType == "Participants" || sourceButtonType == "Outputs" || sourceButtonType == "Roles" && sourceButtonType != "Considerations"){
                     var sourceBBox = sourceCell.getBBox();
                     var targetBBox = targetCell.getBBox();
                     var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
@@ -59,7 +59,7 @@ function setLinkVertices(){
                         sourceMidX += difference
                     }
                     if(parseInt(sourceBBox.width) > 1000){
-                        distance = 2800
+                        distance = 3000
                         var difference = distance - sourceMidX
                         sourceMidX += difference
                     }
@@ -83,7 +83,7 @@ Sets the position of a target element based on the position of the source elemen
 function setElementsPosition(element, position){
     if(element){
         var label = (element.attr('label'))
-        if(element.attributes.name['first'] != "Activities" && element.attributes.name['first'] != "Considerations"){
+        if(element.attributes.name['first'] == "Topics" || element.attributes.name['first'] == "Outcomes"){
             const parentElement = graph.getPredecessors(element)[0]
             if(parentElement){
                 const parentPositionX = parentElement.position().x
@@ -98,22 +98,26 @@ function setElementsPosition(element, position){
             label.refX = "5%"
             element.set('position', { x: distance , y: position.y});
             }
-        }else{
+        }
+
+        if(element.attributes.name['first'] == "Activities" || element.attributes.name['first'] == "Considerations"){
             const parentElement = graph.getPredecessors(element)[0]
-            if(parentElement){
-            const parentPositionX = parentElement.position().x
-            const parentSize = parseInt(parentElement.size().width)
-            var distance = parentPositionX + parentSize + 250
-            if(distance != 600 && distance < 600){
-                const difference = 600 - distance;
-                distance = distance + difference
-            }else{
-                distance = distance + 500
-            }
-            label.refX = "5%"
-            element.set('position', { x: distance , y: position.y});
+                if(parentElement){
+                const parentPositionX = parentElement.position().x
+                const parentSize = parseInt(parentElement.size().width)
+                var distance = parentPositionX + parentSize + 150
+                if(distance != 600 && distance < 600){
+                    const difference = 600 - distance;
+                    distance = distance + difference
+                }else{
+                    distance = distance + 500
+                }
+                label.refX = "5%"
+                element.set('position', { x: distance , y: position.y});
             }
         }
+
+
 
         const nodeType = element.attributes.name['first']
         if(nodeType == "Methods" || nodeType == "Participants" || nodeType == "Roles" || nodeType == "Resources" || nodeType == "Outputs"){
@@ -128,22 +132,20 @@ function setElementsPosition(element, position){
             })
             var sourceCell = graph.getCell(sourceElement)
             var parentElement = sourceCell
-            console.log(parentElement)
             if(parentElement){
                 const parentPositionX = parseInt(parentElement.position().x)
                 const parentSize = parseInt(parentElement.size().width)
-                var distance = parentPositionX + parentSize
+                var distance = parentPositionX + parentSize + 150
                 distance = parseInt(distance)
-            if(distance != 400 && distance < 400){
-                console.log("Here")
-                const difference = 400 - distance;
-                distance = distance + difference
-            }else{
-                console.log("Here")
-                distance = distance + 300
-            }
-            label.refX = "5%"
-            element.set('position', { x: distance , y: position.y/2});
+                if(distance != 400 && distance < 400){
+                    const difference = 400 - distance;
+                    distance = distance + difference
+                }else{
+                    distance = distance + 300
+                }
+                label.refX = "5%"
+                // position.y = (position.y / 2) + 50
+                element.set('position', { x: distance , y: position.y});
             }
         }
     }
