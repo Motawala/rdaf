@@ -6,13 +6,24 @@ paper.on('cell:mouseover', function(cellView) {
             const resourceElement = (cellView.el.querySelectorAll('rect')[0])
             resourceElement.setAttribute('fill', "#7490D7")
         }else if(cellView.model.attributes.name['first'] == "Stages"){
+            var bbox = cellView.model.getBBox();
+            var paperRect1 = paper.localToPaperRect(bbox);
             const stageElement = cellView.el.querySelectorAll('rect')[0]
             stageElement.setAttribute('fill', "#B0AEAC")
+            var textBlock = document.getElementById(cellView.model.id)
+            textBlock.style.left = ((paperRect1.x) + 100) + 'px';
+            textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+            textBlock.style.backgroundColor = 'white'
+            animateTextBlock(textBlock, true)
+            const timeoutID = setTimeout(function() {
+                console.log("Here")
+                textBlock.style.visibility = "visible";
+            }, 1000);
+            clearTimeout(timeoutID)
         }
       //From the element view look for the element tools
         var toolsArray = cellView._toolsView.tools
         toolsArray.forEach(element => {
-            element
             if (element.childNodes && element.childNodes.button) {
                     const subtopicButton = element.$el[0]
                     subtopicButton.addEventListener('mouseover', function() {
@@ -32,34 +43,35 @@ paper.on('cell:mouseover', function(cellView) {
                             element.childNodes.button.setAttribute('fill', 'darkgrey')
                             var textBlock = document.getElementById(cellView.model.id)
                             if(textBlock != null){
-                                textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                                textBlock.style.left = (paperRect1.x + 10) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 55) + 'px';
                                 animateTextBlock(textBlock, true)
                                 textBlock.style.visibility = "visible"
                             }
                         }
                         else if(element.childNodes.button.id == "Activities"){
-                                element.childNodes.button.setAttribute('fill', '#004265')
-                                var textBlock = document.getElementById("Activities" + cellView.model.id)
-                                textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
-                                textBlock.style.top = ((paperRect1.y) + 55) + 'px';
-                                animateTextBlock(textBlock, true)
-                                textBlock.style.visibility = "visible"
+                            element.childNodes.button.setAttribute('fill', '#004265')
+                            var textBlock = document.getElementById("Activities" + cellView.model.id)
+                            textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
+                            textBlock.style.top = ((paperRect1.y) + 55) + 'px';
+                            animateTextBlock(textBlock, true)
+                            textBlock.style.visibility = "visible"
                         }
                         else if(element.childNodes.button.id == "Considerations"){
-                                element.childNodes.button.setAttribute('fill', '#004265')
-                                var textBlock = document.getElementById(cellView.model.id)
+                            element.childNodes.button.setAttribute('fill', '#004265')
+                            var textBlock = document.getElementById("Considerations" + cellView.model.id)
+                            if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 60) + 'px';
                                 animateTextBlock(textBlock, true)
-                                //textBlock.style.visibility = "visible"
+                                textBlock.style.visibility = "visible"
+                            }
                         }
                         else if(element.childNodes.button.id == "Outcomes"){
                             element.childNodes.button.setAttribute('fill', '#004265')
                             var textBlock = document.getElementById(cellView.model.id)
                             textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                             textBlock.style.top = ((paperRect1.y) + 50) + 'px';
-
                             animateTextBlock(textBlock, true)
                             textBlock.style.visibility = "visible"
                         }
@@ -68,7 +80,7 @@ paper.on('cell:mouseover', function(cellView) {
                             var textBlock = document.getElementById("Outputs" + cellView.model.id)
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
-                                textBlock.style.top = ((paperRect1.y) + 40) + 'px';
+                                textBlock.style.top = ((paperRect1.y) + 130) + 'px';
                                 animateTextBlock(textBlock, true)
                                 textBlock.style.visibility = "visible"
                             }else{
@@ -77,6 +89,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                         else if(element.childNodes.button.id == "Participants"){
                             element.childNodes.button.setAttribute('fill', '#004265')
+                            var textBlock = document.getElementById("Participants" + cellView.model.id)
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -88,6 +101,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                         else if(element.childNodes.button.id == "Methods"){
                             element.childNodes.button.setAttribute('fill', '#004265')
+                            var textBlock = document.getElementById("Methods" + cellView.model.id)
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -99,6 +113,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                         else if(element.childNodes.button.id == "Roles"){
                             element.childNodes.button.setAttribute('fill', '#004265')
+                            var textBlock = document.getElementById("Roles" + cellView.model.id)
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -110,6 +125,7 @@ paper.on('cell:mouseover', function(cellView) {
                         }
                         else if(element.childNodes.button.id == "Resources"){
                             element.childNodes.button.setAttribute('fill', '#004265')
+                            var textBlock = document.getElementById("Resources" + cellView.model.id)
                             if(textBlock){
                                 textBlock.style.left = (paperRect1.x + cellView.model.size().width - 20) + 'px';
                                 textBlock.style.top = ((paperRect1.y) + 40) + 'px';
@@ -119,7 +135,6 @@ paper.on('cell:mouseover', function(cellView) {
                                 console.log()
                             }
                         }
-
                         else{
                             console.log()
                         }
@@ -143,6 +158,8 @@ paper.on('cell:mouseover', function(cellView) {
         }else if(cellView.model.attributes.name['first'] == "Stages"){
             const stageElement = cellView.el.querySelectorAll('rect')[0]
             stageElement.setAttribute('fill', "#E2E3E5")
+            var textBlock = document.getElementById(cellView.model.id)
+            textBlock.style.visibility = "hidden"
         }
         //From the element View look for the element tools
         var toolsArray = cellView._toolsView.tools
@@ -153,76 +170,44 @@ paper.on('cell:mouseover', function(cellView) {
                     // Set the position of the element according to the pointer and make it visible
                     //Look for any events on subtopic button
                     if(element.childNodes.button.id == "RDaF Subtopic"){
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Definition"){
                         // Set the position of the element according to the pointer and make it visible
                         element.childNodes.button.setAttribute('fill', 'black')
-                        var textBlock = document.getElementById(cellView.model.id)
-                        textBlock.style.visibility = "hidden"
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Activities"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById("Activities" + cellView.model.id)
-                        textBlock.style.visibility = "hidden"
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Considerations"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Outcomes"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById(cellView.model.id)
-                        if(textBlock){
-                            textBlock.style.visibility = "hidden"
-                        }else{
-                            console.log()
-                        }
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Outputs"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById("Outputs" + cellView.model.id)
-                        if(textBlock){
-                            textBlock.style.visibility = "hidden"
-                        }else{
-                            console.log()
-                        }
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Participants"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById("Participants" + cellView.model.id)
-                        if(textBlock){
-                            textBlock.style.visibility = "hidden"
-                        }else{
-                            console.log()
-                        }
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Roles"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById("Roles" + cellView.model.id)
-                        if(textBlock){
-                            textBlock.style.visibility = "hidden"
-                        }else{
-                            console.log()
-                        }
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Resources"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById("Resources" + cellView.model.id)
-                        if(textBlock){
-                            textBlock.style.visibility = "hidden"
-                        }else{
-                            console.log()
-                        }
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
                     else if(element.childNodes.button.id == "Methods"){
                         element.childNodes.button.setAttribute('fill', '#005C90')
-                        var textBlock = document.getElementById("Methods" + cellView.model.id)
-                        if(textBlock){
-                            textBlock.style.visibility = "hidden"
-                        }else{
-                            console.log()
-                        }
+                        hideTextBlock(element.childNodes.button.id, cellView.model)
                     }
 
 
@@ -249,3 +234,23 @@ function animateTextBlock(htmlEl, show) {
         { duration: duration, fill: 'forwards' }
     );
 }
+
+function hideTextBlock(buttonId, model){
+    const allowedButtonIds = ["Outputs", "Roles", "Resources", "Participants", "Methods", "Considerations", "Activities"];
+    if(allowedButtonIds.includes(buttonId)){
+        var textBlock = document.getElementById(buttonId + model.id)
+        if(textBlock){
+            textBlock.style.visibility = "hidden"
+        }else{
+            console.log()
+        }
+    }else{
+        var textBlock = document.getElementById(model.id)
+        if(textBlock){
+            textBlock.style.visibility = "hidden"
+        }else{
+            console.log()
+        }
+    }
+}
+

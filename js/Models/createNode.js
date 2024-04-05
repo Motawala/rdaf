@@ -125,7 +125,7 @@ function createConsiderations(id, name){
   const node =  new joint.shapes.standard.Rectangle({
     id: id,
     size: {
-      width: width + 100,
+      width: width + 50,
       height: 35
     },
     attrs: {
@@ -204,7 +204,7 @@ function createActivities(id, name){
       id: id,
       size: {
         width: width + 100,
-        height: 120
+        height: 145
       },
       attrs: {
         label: {

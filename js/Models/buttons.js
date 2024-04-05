@@ -122,10 +122,13 @@ function buttonView(portName, element){
       if(ports == "RDaF Subtopic"){
         tool.push(createSubTopicButton(port1))
       }
+      if(ports == "Considerations"){
+        tool.push(createConsiderationButton(port1))
+      }
     })
   }
-  createElementView(element, tool)
-
+  var toolsView = createElementView(element, tool)
+  return toolsView
 }
 
 function createElementView(element, tool){
@@ -136,6 +139,7 @@ function createElementView(element, tool){
   var elementView = element.findView(paper)
   //Embed tthe tools view in to the element view
   elementView.addTools(toolsView);
+  return toolsView
 }
 
 
@@ -195,7 +199,7 @@ function createSubTopicButton(port, pos){
         selector: 'button',
         attributes: {
             'id': port.id,
-            'width': 100,
+            'width': 105,
             'height': 20,
             'fill': 'lightgrey', // Button background color
             'stroke': 'black', // Button border color
@@ -209,11 +213,11 @@ function createSubTopicButton(port, pos){
           textContent: port.id, // Text displayed on the button
           attributes: {
             'fill': 'black', // Text color
-            'font-size': '12px',
+            'font-size': '14px',
             'font-weight': 'bold',
             'font-family': 'Arial',
             'text-anchor': 'middle',
-            'x':47,
+            'x':52,
             'y': 15, // Adjust text position
             'cursor': 'pointer'
         }
@@ -393,7 +397,7 @@ function createRolesButton(port,pos) {
         }
     ],
     x: "85%", // Button position X
-    y: "20%", // Button position Y
+    y: "16%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
     },
@@ -434,7 +438,7 @@ function createParticipantsButton(port,pos) {
         }
     ],
     x: "85%", // Button position X
-    y: "40%", // Button position Y
+    y: "32%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
     },
@@ -475,7 +479,7 @@ function createOutputButton(port,pos) {
         }
     ],
     x: "85%", // Button position X
-    y: "80%", // Button position Y
+    y: "65%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
     },
@@ -517,7 +521,7 @@ function createResourcesButton(port,pos) {
         }
     ],
     x: "85%", // Button position X
-    y: "60%", // Button position Y
+    y: "49%", // Button position Y
     action: function(evt, elementView) {
       toggelButton(this.model, `${port.id}`)
     },

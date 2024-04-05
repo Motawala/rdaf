@@ -36,7 +36,7 @@ function setLinkVertices(){
 
                 var sourceBBox = sourceCell.getBBox();
                 var targetBBox = targetCell.getBBox();
-                var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width) + 100          //Length of the x from S to T
+                var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width) + 100     //Length of the x from S to T
                 var sourceMidY = parseInt(sourceBBox.y) + parseInt(sourceBBox.height)/2;            //Point on the Y edge of the source element where to start from
                 var targetX = sourceMidX;                                                           //Point where the link ends
                 var targetMidY = parseInt(targetBBox.y) + parseInt(targetBBox.height)/2;            //Point where the link is attached in the end
@@ -46,7 +46,7 @@ function setLinkVertices(){
                 ])
                 const sourceButtonType = sourceCell.attributes.name['first']
                 // Different settings for the vertices from the Outcomes as multiple outcomes shares same activities
-                if(sourceButtonType == "Outcomes" || sourceButtonType == "Resources" || sourceButtonType == "Participants" || sourceButtonType == "Outputs" || sourceButtonType == "Roles" && sourceButtonType != "Considerations"){
+                if(sourceButtonType == "Outcomes" && sourceButtonType != "Considerations"){
                     var sourceBBox = sourceCell.getBBox();
                     var targetBBox = targetCell.getBBox();
                     var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
@@ -59,7 +59,27 @@ function setLinkVertices(){
                         sourceMidX += difference
                     }
                     if(parseInt(sourceBBox.width) > 1000){
-                        distance = 3000
+                        distance = 2800
+                        var difference = distance - sourceMidX
+                        sourceMidX += difference
+                    }
+                    var sourceMidY = parseInt(sourceBBox.y) + parseInt(sourceBBox.height)/2;
+                    var targetX = sourceMidX;
+                    var targetMidY = parseInt(targetBBox.y) + parseInt(targetBBox.height)/2;
+                    link.set('vertices', [
+                        {x: sourceMidX, y: sourceMidY},
+                        {x: targetX, y: targetMidY}
+                    ])
+                }
+                if(sourceButtonType == "Activities"){
+                    var sourceBBox = sourceCell.getBBox();
+                    var targetBBox = targetCell.getBBox();
+                    var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
+                    var distance = 3900
+                    if(sourceMidX != distance && sourceMidX > distance){
+                        var difference = sourceMidX - distance
+                        sourceMidX -= difference
+                    }else if(sourceMidX != distance && sourceMidX < distance){
                         var difference = distance - sourceMidX
                         sourceMidX += difference
                     }
@@ -105,12 +125,12 @@ function setElementsPosition(element, position){
                 if(parentElement){
                 const parentPositionX = parentElement.position().x
                 const parentSize = parseInt(parentElement.size().width)
-                var distance = parentPositionX + parentSize + 150
-                if(distance != 600 && distance < 600){
-                    const difference = 600 - distance;
+                var distance = parentPositionX + parentSize + 100
+                if(distance != 300 && distance < 300){
+                    const difference = 300 - distance;
                     distance = distance + difference
                 }else{
-                    distance = distance + 500
+                    distance = distance + 400
                 }
                 label.refX = "5%"
                 element.set('position', { x: distance , y: position.y});
@@ -145,7 +165,7 @@ function setElementsPosition(element, position){
                 }
                 label.refX = "5%"
                 // position.y = (position.y / 2) + 50
-                element.set('position', { x: distance , y: position.y});
+                element.set('position', { x: 4000 , y: position.y});
             }
         }
     }

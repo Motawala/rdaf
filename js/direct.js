@@ -58,6 +58,7 @@ function buildTheGraph(){
     if(node['additionalType'] == "RdAF Stage"){
       var stage = linkNodes(node, Elements, "", "Stages")
       graph.addCells(stage)
+      createTextBlock(stage, node, stage)
       root.push(stage)
       topic = node['sunyrdaf:includes']
       if(Array.isArray(topic)){
@@ -336,9 +337,10 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
     activityElement.prop('name/first', "Activities")
     arr.push(activityElement, linkOutcomeToActivity)
     graph.addCells(activityElement, linkOutcomeToActivity)
-    const portNameList = ['Participants', 'Methods', "Roles", "Resources", "Outputs", "RDaF Subtopic"]
-    buttonView(portNameList, activityElement)
-    createDropDownMenu(activityElement)
+    const portNameList = ['Participants', 'Methods', "Roles", "Resources", "Outputs", "RDaF Subtopic", "Considerations"]
+    const buttonview = buttonView(portNameList, activityElement)
+    buttonview.tools[6].options.x = "85%"
+    buttonview.tools[6].options.y = "82%"
     return activityElement;
   }
   if(typeOfNode == "Considerations"){
@@ -393,6 +395,7 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       multiParentElementIds[childNode['@id']] = outputElement
       var linkOutputToActivity = makeLink(parentNode, outputElement)
       outputElement.prop('name/first', "Outputs")
+      createTextBlock(outputElement, childNode['@id'], parentNode)
       arr.push(outputElement, linkOutputToActivity)
     }
     return outputElement;
@@ -413,6 +416,7 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = methodElement
       methodElement.prop('name/first', "Methods")
+      createTextBlock(methodElement, childNode['@id'], parentNode)
       arr.push(methodElement, linkMethodToActivity)
     }
     return methodElement;
@@ -433,6 +437,7 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = participantElement
       participantElement.prop('name/first', "Participants")
+      createTextBlock(participantElement, childNode['@id'], parentNode)
       arr.push(participantElement, linkParticipantToActivity)
     }
     return participantElement;
@@ -453,6 +458,7 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       multiParentElementIds[childNode['@id']] = roleElement
       var linkRoleToActivity = makeLink(parentNode, roleElement)
       roleElement.prop('name/first', "Roles")
+      createTextBlock(roleElement, childNode['@id'], parentNode)
       arr.push(roleElement, linkRoleToActivity)
     }
     return roleElement;
@@ -474,6 +480,7 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       var linkResourceToActivity = makeLink(parentNode, resourceElement)
       resourceElement.prop('name/first', "Resources")
       resourceElement.prop('resource/Link', childNode['@id'])
+      createTextBlock(resourceElement, childNode['@id'], parentNode)
       arr.push(resourceElement, linkResourceToActivity)
     }
     return resourceElement;
@@ -512,6 +519,8 @@ function doLayout() {
 
 function init(){
 // Create a new directed graph
+
+
 graph = new dia.Graph({}, { cellNamespace: shapes });
 
 // Create a new paper, which is a wrapper around SVG element
@@ -520,8 +529,8 @@ paper = new dia.Paper({
   el: document.getElementById('graph-container'),
   model: graph,
   interactive: { vertexAdd: false }, // disable default vertexAdd interaction,
-  width: 2850, //window.innerWidth,
-  height: 1350,//window.innerHeight,
+  width: window.innerWidth, //window.innerWidth,
+  height: window.innerHeight,//window.innerHeight,
   gridSize: 10,
   perpendicularLinks: true,
   drawGrid: true,

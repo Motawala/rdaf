@@ -21,7 +21,17 @@ function createTextBlock(element, node, parentNode){
     if(element.attributes.name['first'] == "Outcomes"){
         div.id = "Activities" + element.id
         div.textContent = "Activities that results in " + element.attr('label')['text']
+        var considerationDiv = div.cloneNode(true)
+        considerationDiv.id = "Considerations" + element.id
+        considerationDiv.textContent = "Consideration for " + element.attr('label')['text']
+        paper.el.appendChild(considerationDiv);
         paper.el.appendChild(div);
+    }
+    if(element.attributes.name['first'] == "Topics"){
+        var considerationDiv = div.cloneNode(true)
+        considerationDiv.id = "Considerations" + element.id
+        considerationDiv.textContent = "Consideration for " + element.attr('label')['text']
+        paper.el.appendChild(considerationDiv);
     }
     if(element.attributes.name['first'] == "Outputs"){
         div.id = "Outputs" + parentNode.id
@@ -51,8 +61,10 @@ function createTextBlock(element, node, parentNode){
     if(node['description'] != null){
         paper.el.appendChild(div);
     }else{
-        if(elementView.model.attributes.name['first'] == "Considerations"){
-        elementView.removeTools()
+        if(elementView){
+            if(elementView.model.attributes.name['first'] == "Considerations"){
+            elementView.removeTools()
+            }
     }
         console.warn()
     }
