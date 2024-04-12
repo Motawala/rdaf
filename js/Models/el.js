@@ -1,9 +1,11 @@
 function createTextBlock(element, node, parentNode){
-    var parentElementView = paper.findViewByModel(parentNode)
     var elementView = paper.findViewByModel(element)
     // Draw an HTML rectangle above the element.
     var div = document.createElement('div');
-    parentElementView.el.style.position = "relative"
+    //parentElementView.el.style.position = "relative"
+    if(!node['name']){
+        node = findNode(node)
+    }
     div.style.position = 'absolute';
     div.style.background = 'white';
     div.textContent = node['description']
@@ -71,40 +73,12 @@ function createTextBlock(element, node, parentNode){
 }
 
 
-//Trying something new for the options in Activitites Element
-function createDropDownMenu(element){
-    var elementView = paper.findViewByModel(element)
-    var menu = document.createElement('select')
-    var elementBBox = elementView.model.getBBox()
-    menu.id = element.id
-    var option1 = document.createElement('option')
-    option1.textContent = "Roles"
-    var option2 = document.createElement('option')
-    option2.textContent = "Methods"
-    var option3 = document.createElement('option')
-    option3.textContent = "Output"
-    var option4 = document.createElement('option')
-    option4.textContent = "Resources"
-    var positionX = parseInt(elementBBox.x) + parseInt(elementBBox.width)
-    var positionY = parseInt(elementBBox.y) + parseInt(elementBBox.height)
-    menu.style.top = "1000px"
-    menu.style.left = "1000px"
-    //menu.style.visibility = "hidden"
-    menu.appendChild(option1)
-    menu.appendChild(option2)
-    menu.appendChild(option3)
-    menu.appendChild(option4)
-    elementView.el.appendChild(menu)
-    paper.el.appendChild(elementView.el);
-}
-
 function subTopicTextBlock(subTopic, parentNode){
-    var nodeCellView = paper.findViewByModel(parentNode)
-    var bbox = nodeCellView.model.getBBox();
+    var bbox = parentNode.getBBox();
     var paperRect1 = paper.localToPaperRect(bbox);
     // Draw an HTML rectangle above the element.
     var div = document.createElement('div');
-    nodeCellView.el.style.position = "relative"
+    //nodeCellView.el.style.position = "relative"
     div.style.position = 'absolute';
     div.style.background = 'white';
     div.textContent = subTopic

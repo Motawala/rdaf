@@ -5,6 +5,7 @@ var root = [];
 var models = [];
 var duplicateFrame = [];
 var createdConsidearitonElementIds = new Set();   //This set stores all the multi linked consideration element in which the definition button is already embedded, to prevent dup ids
+var createdActivityElementIds = new Set();
 var multiParentElementIds = {}
 var createdActivityTargets = new Set();
 var elementsAlreadyPositioned = new Set();
@@ -70,21 +71,23 @@ function buildTheGraph(){
           const width = topicElement.size().width
           const height = topicElement.size().height
           topicElement.size(width + 200, height)
+          var topicElementPosition = topicElement.getBBox()
           Elements.push(topicElement)
           if(topicObj["sunyrdaf:includes"]){
             //Creates the consideration button if a topic includes consideration
-            var port3 = createPort('Considerations', 'out');
+            var port3 = createPort('Considerations', 'out', "100%", 40);
             // Add custom tool buttons for each port
             topicElement.addPort(port3);        // Adds a port to the element
             const considerationButton = createConsiderationButton(port3)
-            considerationButton.options.x = "80%"
+
+            considerationButton.options.x = parseInt(topicElementPosition.x) + parseInt(topicElementPosition.width) - 115
             tools.push(considerationButton)       //Create the button
           }
-          var port2 = createPort('Outcomes', 'out');
+          var port2 = createPort('Outcomes', 'out', "100%", 20);
           // Add custom tool buttons for each port
           topicElement.addPort(port2);
           const outcomeButton = createButton(port2)
-          outcomeButton.options.x = "80%"
+          outcomeButton.options.x = parseInt(topicElementPosition.x) + parseInt(topicElementPosition.width) - 115
           tools.push(outcomeButton)//Creates the Outcome button
           graph.addCells(topicElement);
           toolsView = new joint.dia.ToolsView({ tools: tools});
@@ -319,47 +322,61 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
   }
   if(typeOfNode == "Topics"){
     var topicElement = createTopics(childNode['@id'], childNode['name'])
-    var linkStageToTopics = makeLink(parentNode, topicElement)
     topicElement.prop('name/first', "Topics")
+    var linkStageToTopics = makeLink(parentNode, topicElement)
     arr.push(topicElement, linkStageToTopics)
     return topicElement;
   }
   if(typeOfNode == "Outcomes"){
     var outcomeElement = createOutcomes(childNode['@id'], childNode['name'])
-    var linkTopicToOutcome = makeLink(parentNode, outcomeElement)
     outcomeElement.prop('name/first', "Outcomes")
+    var linkTopicToOutcome = makeLink(parentNode, outcomeElement)
     arr.push(outcomeElement, linkTopicToOutcome)
     return outcomeElement;
   }
   if(typeOfNode == "Activities"){
-    var activityElement = createActivities(childNode['@id'], childNode['name'])
-    var linkOutcomeToActivity = makeLink(parentNode, activityElement)
-    activityElement.prop('name/first', "Activities")
-    arr.push(activityElement, linkOutcomeToActivity)
-    graph.addCells(activityElement, linkOutcomeToActivity)
-    const portNameList = ['Participants', 'Methods', "Roles", "Resources", "Outputs", "RDaF Subtopic", "Considerations"]
-    const buttonview = buttonView(portNameList, activityElement)
-    buttonview.tools[6].options.x = "85%"
-    buttonview.tools[6].options.y = "82%"
+    var activityElement;
+    if(createdActivityElementIds.has(childNode['@id'])){
+      console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
+      if(multiParentElementIds[childNode['@id']]){
+        activityElement = multiParentElementIds[childNode['@id']];
+        activityElement.prop('name/first', "Activities")
+        var linkOutcomeToActivity = makeLink(parentNode, activityElement)
+        arr.push(activityElement, linkOutcomeToActivity)
+      }
+    }else{
+      activityElement = createActivities(childNode['@id'], childNode['name'])
+      activityElement.prop('name/first', "Activities")
+      const portNameList = ['Participants', 'Methods', "Roles", "Resources", "Outputs", "RDaF Subtopic", "Considerations"]
+      const buttonview = buttonView(portNameList, activityElement)
+      var elementBBox = activityElement.getBBox()
+      createdActivityElementIds.add(childNode['@id']);
+      multiParentElementIds[childNode['@id']] = activityElement
+      var linkOutcomeToActivity = makeLink(parentNode, activityElement)
+      buttonview.tools[6].options.x = "85%"
+      buttonview.tools[6].options.y = "85%"
+      buttonview.tools[6].options.x = parseInt(elementBBox.x) + parseInt(elementBBox.width) - 115
+      arr.push(activityElement, linkOutcomeToActivity)
+    }
     return activityElement;
   }
   if(typeOfNode == "Considerations"){
     var considerationElement
     if (createdConsidearitonElementIds.has(childNode['@id'])) {
-      console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
       if(multiParentElementIds[childNode['@id']]){
         considerationElement = multiParentElementIds[childNode['@id']];
-        var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
         considerationElement.prop('name/first', "Considerations")
+        var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
         arr.push(considerationElement, linkOutcomeToConsideration)
       }
     }else{
       considerationElement = createConsiderations(childNode['@id'], childNode['name'])
+      considerationElement.prop('name/first', "Considerations")
       const embedButton = buttonView("Definition", considerationElement)
+      createTextBlock(considerationElement, childNode['@id'], parentNode)
       createdConsidearitonElementIds.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = considerationElement
       var linkOutcomeToConsideration = makeLink(parentNode, considerationElement)
-      considerationElement.prop('name/first', "Considerations")
       arr.push(considerationElement, linkOutcomeToConsideration)
     }
     return considerationElement;
@@ -385,16 +402,16 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
       if(multiParentElementIds[childNode['@id']]){
         outputElement = multiParentElementIds[childNode['@id']];
-        var linkOutputToActivity = makeLink(parentNode, outputElement)
         outputElement.prop('name/first', "Outputs")
+        var linkOutputToActivity = makeLink(parentNode, outputElement)
         arr.push(linkOutputToActivity)
       }
     }else{
       outputElement = createOutputs(childNode['@id'], childNode['name'])
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = outputElement
-      var linkOutputToActivity = makeLink(parentNode, outputElement)
       outputElement.prop('name/first', "Outputs")
+      var linkOutputToActivity = makeLink(parentNode, outputElement)
       createTextBlock(outputElement, childNode['@id'], parentNode)
       arr.push(outputElement, linkOutputToActivity)
     }
@@ -406,16 +423,16 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
       if(multiParentElementIds[childNode['@id']]){
         methodElement = multiParentElementIds[childNode['@id']];
-        var linkMethodToActivity = makeLink(parentNode, methodElement)
         methodElement.prop('name/first', "Methods")
+        var linkMethodToActivity = makeLink(parentNode, methodElement)
         arr.push(linkMethodToActivity)
       }
     }else{
       methodElement = createMethods(childNode['@id'], childNode['name'])
+      methodElement.prop('name/first', "Methods")
       var linkMethodToActivity = makeLink(parentNode, methodElement)
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = methodElement
-      methodElement.prop('name/first', "Methods")
       createTextBlock(methodElement, childNode['@id'], parentNode)
       arr.push(methodElement, linkMethodToActivity)
     }
@@ -427,16 +444,16 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
       if((multiParentElementIds[childNode['@id']])){
         participantElement = multiParentElementIds[childNode['@id']];
-        var linkParticipantToActivity = makeLink(parentNode, participantElement)
         participantElement.prop('name/first', "Participants")
+        var linkParticipantToActivity = makeLink(parentNode, participantElement)
         arr.push(participantElement,linkParticipantToActivity)
       }
     }else{
       participantElement = createParticipants(childNode['@id'], childNode['name'])
+      participantElement.prop('name/first', "Participants")
       var linkParticipantToActivity = makeLink(parentNode, participantElement)
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = participantElement
-      participantElement.prop('name/first', "Participants")
       createTextBlock(participantElement, childNode['@id'], parentNode)
       arr.push(participantElement, linkParticipantToActivity)
     }
@@ -448,17 +465,18 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
       if((multiParentElementIds[childNode['@id']])){
         roleElement =  multiParentElementIds[childNode['@id']];
-        var linkRoleToActivity = makeLink(parentNode, roleElement)
+        createTextBlock(roleElement, childNode['@id'], parentNode)
         roleElement.prop('name/first', "Roles")
+        var linkRoleToActivity = makeLink(parentNode, roleElement)
         arr.push(linkRoleToActivity)
       }
     }else{
       roleElement = createRoles(childNode['@id'], childNode['name'])
+      roleElement.prop('name/first', "Roles")
+      createTextBlock(roleElement, childNode['@id'], parentNode)
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = roleElement
       var linkRoleToActivity = makeLink(parentNode, roleElement)
-      roleElement.prop('name/first', "Roles")
-      createTextBlock(roleElement, childNode['@id'], parentNode)
       arr.push(roleElement, linkRoleToActivity)
     }
     return roleElement;
@@ -469,17 +487,17 @@ function linkNodes(childNode, arr, parentNode, typeOfNode){
       //console.warn(`Element with ID '${childNode['name']}' already exists. Skipping creation.`);
       if((multiParentElementIds[childNode['@id']])){
         resourceElement =  multiParentElementIds[childNode['@id']];
-        var linkResourceToActivity = makeLink(parentNode, resourceElement)
         resourceElement.prop('name/first', "Resources")
+        var linkResourceToActivity = makeLink(parentNode, resourceElement)
         arr.push(linkResourceToActivity)
       }
     }else{
       resourceElement = createResources(childNode['@id'], childNode['name'])
       createdActivityTargets.add(childNode['@id'])
       multiParentElementIds[childNode['@id']] = resourceElement
-      var linkResourceToActivity = makeLink(parentNode, resourceElement)
       resourceElement.prop('name/first', "Resources")
       resourceElement.prop('resource/Link', childNode['@id'])
+      var linkResourceToActivity = makeLink(parentNode, resourceElement)
       createTextBlock(resourceElement, childNode['@id'], parentNode)
       arr.push(resourceElement, linkResourceToActivity)
     }
@@ -543,6 +561,12 @@ paper = new dia.Paper({
   interactive: {
       linkMove: false,
       labelMove: false
+  },
+  connectionPoint: {
+    name: 'boundary',
+    args: {
+        sticky: true
+    }
   },
   async: true,
   //Viewport function supports collapsing/uncollapsing behaviour on paper

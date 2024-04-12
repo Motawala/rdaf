@@ -1,18 +1,17 @@
 function updateAnchorConnection(element){
     var sourceLinks = graph.getConnectedLinks(element, {outbound: true})
-        sourceLinks.forEach(links =>{
-            links.source(element, {
-                anchor: {
-                    name: 'right',
-                    args: {
-                        rotate: false,
-                        dx: 115,            //100 because the width of the element was increase by 100 (offset 100)
-                        dy: 0
-                    }
+    sourceLinks.forEach(links =>{
+        links.source(element, {
+            anchor: {
+                name: 'right',
+                args: {
+                    rotate: false,
+                    dx: 115,            //100 because the width of the element was increase by 100 (offset 100)
+                    dy: 0
                 }
-            });
-
-        })
+            }
+        });
+    })
 }
 
 
@@ -33,7 +32,6 @@ function setLinkVertices(){
                 if(!sourceCell || !targetCell){
                     return;
                 }
-
                 var sourceBBox = sourceCell.getBBox();
                 var targetBBox = targetCell.getBBox();
                 var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width) + 100     //Length of the x from S to T
@@ -50,7 +48,7 @@ function setLinkVertices(){
                     var sourceBBox = sourceCell.getBBox();
                     var targetBBox = targetCell.getBBox();
                     var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
-                    var distance = 2200
+                    var distance = 2500
                     if(sourceMidX != distance && sourceMidX > distance){
                         var difference = sourceMidX - distance
                         sourceMidX -= difference
@@ -75,7 +73,13 @@ function setLinkVertices(){
                     var sourceBBox = sourceCell.getBBox();
                     var targetBBox = targetCell.getBBox();
                     var sourceMidX = parseInt(sourceBBox.x) + parseInt(sourceBBox.width)
-                    var distance = 3900
+                    var distance
+                    if(sourceBBox.width < 950){
+                        distance  = 4000
+                    }else{
+                        distance = 4700
+                    }
+
                     if(sourceMidX != distance && sourceMidX > distance){
                         var difference = sourceMidX - distance
                         sourceMidX -= difference
@@ -83,9 +87,28 @@ function setLinkVertices(){
                         var difference = distance - sourceMidX
                         sourceMidX += difference
                     }
-                    var sourceMidY = parseInt(sourceBBox.y) + parseInt(sourceBBox.height)/2;
                     var targetX = sourceMidX;
-                    var targetMidY = parseInt(targetBBox.y) + parseInt(targetBBox.height)/2;
+                    var targetMidY =  parseInt(targetBBox.y) + parseInt(targetBBox.height)/2;
+                    //Sets the path of the source link accroding to the ports y coordinate
+
+                    if(targetCell.prop("name/first") == "Methods"){
+                        sourceMidY = parseInt(sourceBBox.y) + parseInt(sourceBBox.height)/10;
+                    }
+                    if(targetCell.prop("name/first") == "Roles"){
+                        sourceMidY = parseInt(sourceBBox.y) + parseInt(sourceBBox.height)/4;
+                    }
+                    if(targetCell.prop("name/first") == "Participants"){
+                        sourceMidY = (parseInt(sourceBBox.y) + parseInt(sourceBBox.height)) - (parseInt(sourceBBox.height)/2);
+                    }
+                    if(targetCell.prop("name/first") == "Resources"){
+                        sourceMidY = (parseInt(sourceBBox.y) + parseInt(sourceBBox.height)) - (parseInt(sourceBBox.height)/4);
+                    }
+                    if(targetCell.prop("name/first") == "Outputs"){
+                        sourceMidY = (parseInt(sourceBBox.y) + parseInt(sourceBBox.height)) - (parseInt(sourceBBox.height)/8);
+                    }
+                    if(targetCell.prop("name/first") == "Considerations"){
+                        sourceMidY =(parseInt(sourceBBox.y) + parseInt(sourceBBox.height)) - (parseInt(sourceBBox.height)/12);
+                    }
                     link.set('vertices', [
                         {x: sourceMidX, y: sourceMidY},
                         {x: targetX, y: targetMidY}
@@ -103,9 +126,10 @@ Sets the position of a target element based on the position of the source elemen
 function setElementsPosition(element, position){
     if(element){
         var label = (element.attr('label'))
-        if(element.attributes.name['first'] == "Topics" || element.attributes.name['first'] == "Outcomes"){
+        if(element.attributes.name['first'] == "Topics" || element.attributes.name['first'] == "Outcomes" || element.attributes.name['first'] == "Considerations"){
             const parentElement = graph.getPredecessors(element)[0]
-            if(parentElement){
+            const parentNodeType = parentElement.attributes.name['first']
+            if(parentElement && (parentNodeType == "Stages" || parentNodeType == "Topics")){
                 const parentPositionX = parentElement.position().x
                 const parentSize = parseInt(parentElement.size().width)
                 var distance = parentPositionX + parentSize
@@ -119,28 +143,7 @@ function setElementsPosition(element, position){
             element.set('position', { x: distance , y: position.y});
             }
         }
-
         if(element.attributes.name['first'] == "Activities" || element.attributes.name['first'] == "Considerations"){
-            const parentElement = graph.getPredecessors(element)[0]
-                if(parentElement){
-                const parentPositionX = parentElement.position().x
-                const parentSize = parseInt(parentElement.size().width)
-                var distance = parentPositionX + parentSize + 100
-                if(distance != 300 && distance < 300){
-                    const difference = 300 - distance;
-                    distance = distance + difference
-                }else{
-                    distance = distance + 400
-                }
-                label.refX = "5%"
-                element.set('position', { x: distance , y: position.y});
-            }
-        }
-
-
-
-        const nodeType = element.attributes.name['first']
-        if(nodeType == "Methods" || nodeType == "Participants" || nodeType == "Roles" || nodeType == "Resources" || nodeType == "Outputs"){
             var sourceLink = (graph.getConnectedLinks(element, {inbound:true}))
             let sourceElement
             sourceLink.forEach(link =>{
@@ -148,14 +151,41 @@ function setElementsPosition(element, position){
                     sourceElement = link.get('source').id
                     return;
                 }
-                console.log()
             })
             var sourceCell = graph.getCell(sourceElement)
             var parentElement = sourceCell
-            if(parentElement){
+            const parentNodeType = parentElement.attributes.name['first']
+            if(parentElement && parentNodeType == "Outcomes"){
+                const parentPositionX = parentElement.position().x
+                const parentSize = parseInt(parentElement.size().width)
+                var distance = parentPositionX + parentSize + 15
+                if(distance != 300 && distance < 300){
+                    const difference = 300 - distance;
+                    distance = distance + difference
+                }else{
+                    distance = distance + 400
+                }
+                label.refX = "5%"
+                element.set('position', { x: 3000 , y: position.y});
+            }
+        }
+        const nodeType = element.attributes.name['first']
+        if(nodeType == "Methods" || nodeType == "Participants" || nodeType == "Roles" || nodeType == "Resources" || nodeType == "Outputs" || nodeType == "Considerations"){
+            var sourceLink = (graph.getConnectedLinks(element, {inbound:true}))
+            let sourceElement
+            sourceLink.forEach(link =>{
+                if(!link.get('hidden')){
+                    sourceElement = link.get('source').id
+                    return;
+                }
+            })
+            var sourceCell = graph.getCell(sourceElement)
+            var parentElement = sourceCell
+            const parentNodeType = parentElement.attributes.name['first']
+            if(parentElement && (parentNodeType == "Activities")){
                 const parentPositionX = parseInt(parentElement.position().x)
                 const parentSize = parseInt(parentElement.size().width)
-                var distance = parentPositionX + parentSize + 150
+                var distance = parentPositionX + parentSize + 15
                 distance = parseInt(distance)
                 if(distance != 400 && distance < 400){
                     const difference = 400 - distance;
@@ -163,24 +193,29 @@ function setElementsPosition(element, position){
                 }else{
                     distance = distance + 300
                 }
+
                 label.refX = "5%"
-                // position.y = (position.y / 2) + 50
                 element.set('position', { x: 4000 , y: position.y});
+                if(parentElement.getBBox().width > 950){
+                    element.set('position', { x: 4900 , y: position.y});
+                }
             }
         }
     }
-
 }
+
+
+
 
 function changePaperSize(){
     var sizeOfContentBox = paper.getContentBBox({useModelGeometry:true});           //Returns the Bounding box of the content that is visible on the page.
     var paperWidth = paper.options.width;   //Paper's initial width
     var paperHeight = paper.options.height; //Papers initial height
-    if ((sizeOfContentBox.width + 100) > paperWidth) {      //Change the width if any elements overflows on x
+    if ((sizeOfContentBox.width) > paperWidth) {      //Change the width if any elements overflows on x
         paperWidth = sizeOfContentBox.width + 100; // Increase width by 100 units
     }
-    if ((sizeOfContentBox.height + 100) > paperHeight) {   //Change the height if any element overflows on y
-        paperHeight = sizeOfContentBox.height; // Increase height by 100 units
+    if ((sizeOfContentBox.height) > paperHeight) {   //Change the height if any element overflows on y
+        paperHeight = sizeOfContentBox.height + 150; // Increase height by 100 units
     }
     paper.setDimensions(paperWidth, paperHeight);
 }
